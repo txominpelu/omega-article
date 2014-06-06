@@ -1,0 +1,34 @@
+
+Difficulties (Problematica) with cluster scheduling
+
+
+Scheduling is a problem that consists on planning the execution of a
+set of computations that we'll call jobs in an execution environment
+with a limited amount of resources. Initially scheduling was studied
+in the context of operating systems however more recently with the
+popularization (?) of datacenters a different range of scheduling
+techniques are being applied for the allocation of resources in
+clusters. 
+
+Clusters can run both batch jobs and long running jobs (services), two
+types of jobs that represent two completely different requirements.
+The former requires most of the resources in a cluster however most of
+the jobs executed in modern clusters (google, yahoo references) are
+batch jobs with short timespan.
+
+One can measure the good use of a cluster by considering if the
+quality constraints required by services are satisfied, the execution
+time of batch jobs and the percentage of cluster utilization. The
+quality of the scheduling algorithm used for a cluster affects all of
+this metrics so considering the costs involved in running a cluster in
+a datacenter and the impact in bussiness terms of having the
+appropriate quality of service for jobs is obvious the importance of
+having a good scheduling algorithm. 
+
+
+
+
+Glossary
+
+- Job
+- Task
