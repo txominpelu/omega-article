@@ -1,6 +1,7 @@
 
-Difficulties (Problematica) with cluster scheduling
+# Introduction
 
+## Difficulties (Problematica) with cluster scheduling
 
 Scheduling is a problem that consists on planning the execution of a
 set of computations that we'll call jobs in an execution environment
@@ -26,9 +27,55 @@ appropriate quality of service for jobs is obvious the importance of
 having a good scheduling algorithm. 
 
 
+## Factors to consider when doing scheduling
+
+- Independent frameworks with different scheduling needs (and
+  currently different implementations  of the scheduling) (e.g Hadoop
+  schedules differently from MPI)
+- Those frameworks need to access the same data (they cannot run in
+different clusters or otherwise they'll need to replicate the data)
+
+So => Ideally there's a need to allow the different frameworks to have an
+scheduling that is adapted to their specific needs while they need to
+share the same cluster so they need to coordinate to be able to share
+the available resources.
+
+- Other needs:
+
+ - Main use of a cluster: batch processes over distributed data
+   (usually map-reduce but it can also be MPI) it is a really specific
+   type of job that needs :
+     - Data locality (so scheduling needs to be done so that jobs that
+     process information that is stored in a specific node of the
+     cluster can be executed in that node)
+     - Many jobs, that don't take too long to execute
+ - Needs to deal with services and jobs (two different needs)
+ - Needs to scale when increasing the number of machines and the
+   number of jobs in the cluster
+ - Ideally the scheduler needs to be simple and should not need to be
+   modified when new frameworks with different needs are added
+
+## Solutions for coordinated cluster scheduling
+
+### Centralized scheduler
+
+Pro:
+
+- Control over the whole cluster
+- Simplest solution when there's only one framework running in the cluster
+
+Problems:
+
+- Complexity
+- Can't adapt to new frameworks with new policies & needs
+- Doesn't scale
+
+### Two-Level scheduler
+
 
 
 Glossary
 
+- Frameworks (distributed application)
 - Job
 - Task
