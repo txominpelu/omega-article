@@ -48,7 +48,10 @@ the available resources.
      - Data locality (so scheduling needs to be done so that jobs that
      process information that is stored in a specific node of the
      cluster can be executed in that node)
-     - Many jobs, that don't take too long to execute
+     - Many jobs, that don't take too long to execute (intensive work
+     for the scheduler and that means that a minor increase in the
+     delay per-task can have a big impact in the duration of jobs that
+     are formed but thousands of small tasks)
  - Needs to deal with services and jobs (two different needs)
  - Needs to scale when increasing the number of machines and the
    number of jobs in the cluster
@@ -70,7 +73,64 @@ Problems:
 - Can't adapt to new frameworks with new policies & needs
 - Doesn't scale
 
+## Static partitioning
+
+(Cluster where alll frameworks have access to the data but they have a
+limited amount of resources that are available and that is decided
+once and doesn't change during the execution of jobs:
+
+Pros:
+
+- Simple
+- Every framework can use their specific scheduler that is specialized
+- There's no possibility of conflicts between frameworks when
+  accessing the resources
+
+Cons:
+
+- Difficult to decide what is the right partition of the resources
+between frameworks
+- Non-optimal utilization of the resources of the cluster, for example
+if one of the frameworks is idle other framework cannot use those
+available resources since the repartition is done statically
+
 ### Two-Level scheduler
+
+Better explanation of mesos:
+
+Mesos provides a solution to the problem of scheduling that is based
+on the fact that defining an scheduler to match the constraints of different
+frameworks is difficult since the needs of these frameworks can be
+extremely heterogenous. To avoid this problem mesos is a platform for
+resource sharing where a master runs a set of frameworks. The master
+offers the posibility to use the available resources to the frameworks
+through offers that the frameworks can accept or reject considering if
+the offered resources match the expectations of the framework. When
+offers are accepted the scheduler of the framework provides
+information about what tasks it want to run and what resources it will
+take and the mesos master will run the tasks on the slaves and
+continue to offer the available resources to the schedulers of the
+other frameworks available in the cluster.
+
+The partition of resources between frameworks is left to the master
+that implements two simple policies, one based on fair resource
+sharing (ref) and another on strict priorities.
+
+
+Pros:
+
+- Really simple central scheduler (master in Mesos terms) that has
+  failover 
+- Flexible: every framework decides how it schedules its tasks, the
+master only offers resources following fairness (explain what fairness is?)
+- Through offer rejection, frameworks can achieve high data locality
+only accepting offers that correspond to nodes where the data is
+stored. To avoid waiting indefinitively a technique called delayed
+scheduling (ref) has proved to achieve high data locality without
+sacrificing job execution time benefiting from the fact that tasks in
+data processing frameworks like hadoop or MPI are short so resources
+are freed frequently.
+- Scalability
 
 
 
@@ -79,3 +139,4 @@ Glossary
 - Frameworks (distributed application)
 - Job
 - Task
+- Data locality
