@@ -1,0 +1,33 @@
+
+Final Goals
+
+
+  - Execute Jobs within given constraints
+
+    Mainly two types of jobs with completely different requirements:
+
+    - Service jobs: long running, resource consuming, require low-latency, high availability
+    - Batch jobs: 
+      - short running, to finish as soon as possible 
+      - splitted in multiple smaller tasks that can be usually parallelized and distributed 
+      (They usually process data that is distributed across a cluster so they benefit from 
+      data locality (explain what it is), 
+      - represent around 80% of the jobs in a cluster 
+      - cannot afford delays in the scheduling
+
+  - Maximize the utilization of the cluster
+
+One or many schedulers?
+
+Requirements for a scheduler
+
+  - Respond to scheduling needs (job constraints)
+  - Be flexible to respond to the different needs of the frameworks that will run in the
+    cluster
+  - Be quick (delays will affect the performance of the cluster. e.g delays in scheduling
+    hadoop tasks can really affect the performance since there are thousands of task per job)
+  - Scale when the cluster grows
+  - Be simple (Ideally)
+
+
+
