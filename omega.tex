@@ -1,7 +1,7 @@
 
 # Introduction
 
-## Difficulties (Problematica) with cluster scheduling
+## Importance of scheduling
 
 Scheduling is planning the execution of a
 set of computations that we'll call jobs in an execution environment
@@ -20,45 +20,45 @@ batch jobs with short timespan.
 One can measure the good use of a cluster by considering if the
 quality constraints required by services are satisfied, the execution
 time of batch jobs and the percentage of cluster utilization. The
-quality of the scheduling algorithm used for a cluster affects all of
-this metrics so considering the costs involved in running a cluster in
-a datacenter and the impact in bussiness terms of having the
-appropriate quality of service for jobs is obvious the importance of
-having a good scheduling algorithm. 
+quality of the scheduling algorithm used for a cluster affects all
+these metrics so having a good scheduling algorithm has a greate
+impact in terms of costs and quality of the services provided.
 
+## Difficulties (Problematica) with cluster scheduling
 
-## Factors to consider when doing scheduling
+However the design of a cluster scheduler is not a straightforward
+task since it has many (sometimes contradictory) requirements.
 
-- Independent frameworks with different scheduling needs (and
-  currently different implementations  of the scheduling) (e.g Hadoop
-  schedules differently from MPI)
-- Those frameworks need to access the same data (they cannot run in
-different clusters or otherwise they'll need to replicate the data)
+The kind of applications that we are going to call frameworks
+that are executed in a cluster can be quite
+heterogenous. For example, the execution of Hadoop [ref]
+jobs has different requirements than the execution of MPI [ref]
+jobs. These frameworks execute differently but most of the
+time they need to access the same data. Given that replicating the
+data and the clusters is an extremely expensive alternative, frameworks
+need to be executed in the same cluster that needs to be able to adapt
+to the specific needs of every application while avoiding conflicts in
+the assignment of resources.
 
-So => Ideally there's a need to allow the different frameworks to have an
-scheduling that is adapted to their specific needs while they need to
-share the same cluster so they need to coordinate to be able to share
-the available resources.
+Schedulers need to be adapted to execute both batch jobs and services
+two kind of jobs that as we have seen have completely different
+requirements that sometimes conflict. Services need to be highly
+available [ref] and provide low latency demanding most of the
+resources of a cluster while batch jobs are composed of thousands of small
+tasks that can be affected by small delays in the scheduler and that
+operate over data stored in the cluster and should
+preferably be executed in the node where the data is kept.
 
-- Other needs:
-
- - Main use of a cluster: batch processes over distributed data
-   (usually map-reduce but it can also be MPI) it is a really specific
-   type of job that needs :
-     - Data locality (so scheduling needs to be done so that jobs that
-     process information that is stored in a specific node of the
-     cluster can be executed in that node)
-     - Many jobs, that don't take too long to execute (intensive work
-     for the scheduler and that means that a minor increase in the
-     delay per-task can have a big impact in the duration of jobs that
-     are formed but thousands of small tasks)
- - Needs to deal with services and jobs (two different needs)
- - Needs to scale when increasing the number of machines and the
-   number of jobs in the cluster
- - Ideally the scheduler needs to be simple and should not need to be
-   modified when new frameworks with different needs are added
+High availability is a requirement applicable to the schedulers
+themselves whose downtime affects the execution of any job to be
+scheduled, but also low latency is required as we have seen in the
+case of the thousand of tasks that usually conform a batch
+job. Availability and low latency become harder requirements as the
+cluster grows, increasing the pressure on the scheduler that becomes
+more prone to failure and to delays.
 
 ## Solutions for coordinated cluster scheduling
+
 
 ### Centralized scheduler
 
