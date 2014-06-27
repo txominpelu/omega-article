@@ -74,7 +74,8 @@ of jobs across the nodes of the cluster. This design has, at least in
 the beginning, the advantage of being simple as well as having
 knowledge about the whole state of the cluster, what makes it capable
 of taking really good scheduling decissions specially when all jobs
-have the same scheduling requirements.
+have the same scheduling requirements. Besides, this design provides a
+good utilization of the resources of the cluster.
 
 However this design that is simple and capable of taking good
 decisions in the beginning, has many problems as the size of the
@@ -97,6 +98,7 @@ the code of the scheduler when a new type of workload appears.
 Pro:
 
 - Control over the whole cluster (capable of taking good scheduling decisions)
+- Good cluster utilization
 - Simplest solution when there's only one framework running in the cluster
 
 Problems:
@@ -108,9 +110,20 @@ Problems:
 
 ## Static partitioning
 
-(Cluster where alll frameworks have access to the data but they have a
-limited amount of resources that are available and that is decided
-once and doesn't change during the execution of jobs:
+To overcome the limitations that the previous model had when dealing
+with clusters where the categories of jobs have different scheduling
+needs, static partitioning allows to split the resources of the cluster
+in as many partitions as the number of categories of jobs that we want to
+treat independently. This strategy is attractive because it allows to
+have an optimized dedicated scheduler for every category while being
+relatively simple since every scheduler manages its portion of the
+cluster without any risk of conflictin with the others. It was
+for a while the model chosen by companies like Yahoo [ref?].
+
+Nonetheless this strategy's drawback is that since the different 
+categories run in different, isolated portions of the cluster the
+resources of the cluster are squandared since there exists no way for
+a category to use the resources that another category is not utilizing.
 
 Pros:
 
