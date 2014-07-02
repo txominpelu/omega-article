@@ -51,6 +51,24 @@
   \begin{frame}
     \begin{itemize}
       \item Centralized Scheduler
+      \begin{itemize}
+        \item Pros
+        \begin{itemize}
+          \item Control over the whole cluster
+          \item Can achieve good cluster utilization
+          \item Can be simple when there's only one framework running in the cluster
+        \end{itemize}
+      \end{itemize}
+      \begin{itemize}
+        \item Cons
+        \begin{itemize}
+          \item Single point of failure
+          \item Doesn't scale (bottleneck)
+          \item It becomes really complex with an environment where many kinds of 
+                jobs are executed
+          \item It doesn't scale well
+        \end{itemize}
+      \end{itemize}
     \end{itemize}
 
   \end{frame}
