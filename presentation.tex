@@ -1,33 +1,100 @@
+\documentclass{beamer}
+\usetheme{Warsaw}
+\title{Cluster Scheduling}
+\author{Inigo Mediavilla}
+\date\today
 
-Final Goals
+\begin{document}
+  \begin{frame}
+    \frametitle{Goals}
+    \begin{itemize} 
+     \item Execute Jobs within given constraints
+       \begin{itemize}
+         \item Two different kinds of jobs (services and batch jobs)
+         \item Types of job constraints
+         \begin{itemize}
+           \item Execution time
+           \item High availability
+           \item Failover
+           \item Data locality
+         \end{itemize}
+       \end{itemize}
+     \item (Secondary) Maximize cluster utilization
+    \end{itemize}
+    %Content goes here
+  \end{frame}
+  \begin{frame}
+    \frametitle{Difficulties}
+    \begin{itemize}
+      \item Scheduler needs to scale as the cluster grows
+      \item Scheduler needs to be highly available
+      \item Heterogenous mixed of jobs to execute 
+            (batch/services, hadoop vs MPI, ..)
+            \em (Different scheduling needs) 
+      \item New data processing frameworks demand subsecond scheduling times for 
+            their tasks
+      \item Ideally the scheduler needs to be simple
+    \end{itemize}
+    %More content goes here
+  \end{frame}
+  \begin{frame}
+    Existing scheduling solutions
+    \begin{itemize}
+      \item Centralized Scheduler
+      \item Static Partitioning
+      \item Two-level phase scheduler (Mesos, YARN)
+      \item Distributed optimisted locking scheduler (Omega)
+      \item Fully distributed scheduler (Sparrow) - Specialized for data processing
+            jobs
+    \end{itemize}
+  \end{frame}
+  \begin{frame}
+    \begin{itemize}
+      \item Centralized Scheduler
+    \end{itemize}
+
+  \end{frame}
+
+\end{document}
+
+%Final Goals
 
 
-  - Execute Jobs within given constraints
+%  - Mainly two types of jobs with completely different requirements:
 
-    Mainly two types of jobs with completely different requirements:
 
-    - Service jobs: long running, resource consuming, require low-latency, high availability
-    - Batch jobs: 
-      - short running, to finish as soon as possible 
-      - splitted in multiple smaller tasks that can be usually parallelized and distributed 
-      (They usually process data that is distributed across a cluster so they benefit from 
-      data locality (explain what it is), 
-      - represent around 80% of the jobs in a cluster 
-      - cannot afford delays in the scheduling
+%    (why is it difficult for a scheduler to schedule service jobs and batch jobs?
+%     because the kind of needs that a service can have are usually different to 
+%     those of batches (who usually need mainly datalocality and low latency for
+%     task assignment), so the dificulty is more that a scheduler has to respond
+%     to completely heterogenous needs)
+     
+%    - Service jobs: long running, resource consuming, require low-latency, high availability
+%    - Batch jobs: 
+%      - short running, to finish as soon as possible 
+%      - splitted in multiple smaller tasks that can be usually parallelized and distributed 
+%      (They usually process data that is distributed across a cluster so they benefit from data locality (explain what it is), 
+%      - represent around 80% of the jobs in a cluster 
+%      - cannot afford delays in the scheduling
 
-  - Maximize the utilization of the cluster
+%  - Maximize the utilization of the cluster
 
-One or many schedulers?
+%Challenges:
 
-Requirements for a scheduler
+%  - Heterogenous applications with different scheduling needs (e.g Hadoop vs MPI)
+%  - Duplicating the cluster's data is expensive and may bring synchronization problems
+%  - Scalibility and high availability (the scheduler needs to be able to be able to keep serving quickly enough as the cluster grows and it cannot afford long downtimes)
 
-  - Respond to scheduling needs (job constraints)
-  - Be flexible to respond to the different needs of the frameworks that will run in the
-    cluster
-  - Be quick (delays will affect the performance of the cluster. e.g delays in scheduling
-    hadoop tasks can really affect the performance since there are thousands of task per job)
-  - Scale when the cluster grows
-  - Be simple (Ideally)
+%One or many schedulers?
+
+%Requirements for a scheduler
+
+%  - Respond to scheduling needs (job constraints)
+%  - Be flexible to respond to the different needs of the frameworks that will run in the cluster
+%  - Be quick (delays will affect the performance of the cluster. e.g delays in scheduling
+%    hadoop tasks can really affect the performance since there are thousands of task per job)
+%  - Scale when the cluster grows
+%  - Be simple (Ideally)
 
 
 

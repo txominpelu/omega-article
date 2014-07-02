@@ -107,6 +107,7 @@ Problems:
 - Doesn't scale (bottleneck)
 - Can't adapt to new frameworks with new policies & needs
 - Complexity
+- It doesn't scale well when the cluster grows
 
 ## Static partitioning
 
@@ -179,6 +180,13 @@ sacrificing job execution time benefiting from the fact that tasks in
 data processing frameworks like hadoop or MPI are short so resources
 are freed frequently.
 - Scalability
+
+Contras:
+
+- Pessimistic locking
+- Framework scheduler written in an indirect style (adapt to the interface, 
+  take actions only when the resources are offered in an indirect away unlike
+  the direct style given by optimistic locking
 
 
 
