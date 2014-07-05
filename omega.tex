@@ -180,6 +180,33 @@ data processing frameworks like hadoop or MPI are short so resources
 are freed frequently.
 - Scalability
 
+Contras:
+
+- Difficult to place picky jobs, for example to do gang scheduling
+frameworks in Mesos need to do resource hoarding what can lead to
+deadlocks
+- Optimistic locking, while a framework is offered some resources it
+holds the lock for the resource for the time the offered is
+available. For example if a framework holds the resources or takes the
+time to respond all other frameworks that are actually ready to accept
+the offer and execute the job will have to wait for the first
+framework to respond to the offer.
+
+Optimistic locking:
+
+Another approach to cluster scheduling that tries to overcome some of
+the limitations of the pesimistic locking of two-level schedulers is
+the optimistic locking approach proposed by google's Omega
+scheduler.
+
+The idea behind optimistic locking is to make the state of the cluster
+available to every framework's scheduler. When one of the framework's
+wants to run a job in the cluster it tries to commit a lock for the
+resources needed to run the task of the job. If the tasks has already
+been taken by another framework since the last update of the cluster's
+state, the framework receives the updated version of the cluster's
+state and it can retry a commit knowing the new state of the cluster.
+
 
 
 Glossary
