@@ -1,4 +1,3 @@
-
 # Introduction
 
 ## Importance of scheduling
@@ -107,6 +106,7 @@ Problems:
 - Doesn't scale (bottleneck)
 - Can't adapt to new frameworks with new policies & needs
 - Complexity
+- It doesn't scale well when the cluster grows
 
 ## Static partitioning
 
@@ -191,6 +191,9 @@ available. For example if a framework holds the resources or takes the
 time to respond all other frameworks that are actually ready to accept
 the offer and execute the job will have to wait for the first
 framework to respond to the offer.
+- Framework scheduler written in an indirect style (adapt to the interface, 
+  take actions only when the resources are offered in an indirect away unlike
+  the direct style given by optimistic locking
 
 Optimistic locking:
 
@@ -206,8 +209,6 @@ resources needed to run the task of the job. If the tasks has already
 been taken by another framework since the last update of the cluster's
 state, the framework receives the updated version of the cluster's
 state and it can retry a commit knowing the new state of the cluster.
-
-
 
 Glossary
 
