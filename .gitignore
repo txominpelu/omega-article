@@ -1,2 +1,6 @@
 *.swo
 *~
+*.aux
+*.dvi
+*.log
+omega.pdf
