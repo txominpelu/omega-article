@@ -197,34 +197,41 @@ available resources since the repartition is done statically
 
 \subsection{Two-Level scheduler}
 
-Better explanation of mesos:
+Two level schedulers give applications, also called
+frameworks, the ability to schedule their tasks independently while
+having access to all the resources available in the cluster. This
+is achieved with an architecture that is based in a master that manages
+the cluster's resources and offers them to the frameworks who can accept 
+the offers, notifying the master of the tasks they want to run and the
+resources they want to run them on, or reject them.
 
-Two level schedulers manages to give every application, also called
-framework, the ability to schedule its tasks independently while
-sharing all the resources of the cluster between the frameworks. This
-is achieved with a model based on resource sharing where a master runs a set of frameworks. The master
-provides the possibility to use the available resources to the frameworks
-through offers that the frameworks can accept or reject considering if
-the offered resources match the expectations of the framework. When
-offers are accepted the scheduler of the framework provides
-information about what tasks it want to run and what resources it will
-take and the mesos master will run the tasks on the slaves and
-continue to offer the available resources to the schedulers of the
-other frameworks available in the cluster.
+The resources of the cluster are provided by the slaves that register to 
+the master at startup providing information about the amount of memory, cpu
+and network bandwith that they put at master's disposal.  
 
-The partition of resources between frameworks is left to the master
-that implements two simple policies, one based on fair resource
-sharing (ref) and another on strict priorities.
+This way frameworks can satisfy their needs (for example data locality [ref]) by 
+rejecting the offers that don't interest them and accepting those who do, thus
+ensuring per framework needs despite a centralized resource manager. 
 
+However, problems start when the interests of two frameworks conflict 
+(for example two frameworks want to run their jobs in the same slave because 
+they both access the same data). In the case of data processing jobs where tasks
+don't take long to execute a technique called delay scheduling [ref] has ensured to
+provide good data locality for the tasks without delaying the execution of the whole
+job. Nonetheless, when two competing frameworks use resource hoarding to incrementally 
+adcquire resources before they start a job deadlocks can emerge.
+
+At the cluster level, global policies are enforced by the way that the master 
+distributes the offers to the frameworks. A cluster manager like Mesos [ref] provides two
+policies one based on fairness [ref] and another on strict priorities, custom policies can
+also be implemented.
+
+Failover on the master is provided with machines that run as backups of the master and
+are capable to restore the master's state when it falls. Schedulers and slaves can find
+the new master to register to with centralized configuration services like Zookeeper [ref].
+
+\subsubsection{Example}
 (add diagram over how mesos works?)
-
-Important notes:
-
-- How does mesos manage to fulfil per-framework constraints when the
-master doesn't have a knowledge of the framework needs? Through offer
-rejection and delay scheduling
-
-
 
 Advantages:
 
