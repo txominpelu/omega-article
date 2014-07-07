@@ -241,10 +241,43 @@ An optimization to the model of resource offers is the possibility for the frame
 to define filters that describe the kinds of offers that a framework will not be interested
 in, this way avoiding innecesary exchanges between the slaves and the masters.
 
-\subsubsection{Example}
+\subsubsection{Execution process}
+
+A simple example where we have only one framework that wants to run a 
+job formed by a single task will serve to explain all the steps that happen
+before a computation can take place in the cluster:
+
+\begin{enumerate}
+\item Master starts. One of the candidates to master is selected as the master and 
+the others remain as backup masters that will take the place of the current leader in
+case it fails. The leader will start listening to the registration of slaves and 
+frameworks.
+\item Slaves start. They find the current master through a distributed configuration 
+service and they register themselves by notifying the resources the put at the disposal
+of the cluster.
+\item The framework is launched. Our framework is started with the idea of executing 
+the job. To do that, it first registers to the master and starts listening to resource
+offers.
+\item Since our framework is the only one in the cluster, the master makes an offer with
+all the resources available to our framework.
+\item The framework receives the offer and accepts it. It does so by responding to the
+offer with a list of the tasks that it wants to run specifying for every task: how to 
+execute the task and what resources will be dedicated to the execution of the task.
+The response will only be valid if the resources assigned to all the tasks are a subset
+of the resources offered by the master.
+\item When the master receives the proposition to run the tasks. It allocates the requested
+resources inside containers in the slaves specified in the response and it launches the
+process to compute the task. To be able to run the tasks the slave obviously needs to 
+have access to the binaries to run the process what is usually done either making the
+binaries accessible to the whole cluster through a distributed filesystem like HDFS [ref]
+or S3[ref] or by ensuring manually that the slaves have all the binaries in a public
+accessible folder.
+\item Once the computation has finished the slave notifies the master that the resources
+are newly available so the master can continue offering them to the frameworks.
+\end{enumerate}
+
+
 (add diagram over how mesos works?)
-
-
 
 Advantages:
 
