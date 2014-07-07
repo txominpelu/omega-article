@@ -226,12 +226,25 @@ distributes the offers to the frameworks. A cluster manager like Mesos [ref] pro
 policies one based on fairness [ref] and another on strict priorities, custom policies can
 also be implemented.
 
+(It is still a weak way to enforce global policies, if we were to define a complex
+policy it would stil be difficult to implement it like that)
+
 Failover on the master is provided with machines that run as backups of the master and
 are capable to restore the master's state when it falls. Schedulers and slaves can find
 the new master to register to with centralized configuration services like Zookeeper [ref].
 
+Partitioning of the resources of the cluster is provided thanks to linux containers [ref]
+an isolation technique that allows to run processes in an allocated subset of the 
+resources of the machine without interferences from other processes. 
+
+An optimization to the model of resource offers is the possibility for the frameworks
+to define filters that describe the kinds of offers that a framework will not be interested
+in, this way avoiding innecesary exchanges between the slaves and the masters.
+
 \subsubsection{Example}
 (add diagram over how mesos works?)
+
+
 
 Advantages:
 
