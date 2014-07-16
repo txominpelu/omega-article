@@ -293,13 +293,16 @@ sacrificing job execution time benefiting from the fact that tasks in
 data processing frameworks like hadoop or MPI are short so resources
 are freed frequently.
 - Scalability
+- Specialized for jobs with high chunk and where schedulers don't take
+too long. With this kind of job, resources are freed frequently and
+every framework gets its faire share of the cluster.
 
 Disadvantages:
 
 - Difficult to place picky jobs, for example to do gang scheduling
 frameworks in Mesos need to do resource hoarding what can lead to
 deadlocks
-- Optimistic locking, while a framework is offered some resources it
+- Pessimistic locking, while a framework is offered some resources it
 holds the lock for the resource for the time the offer is
 available. For example if a framework holds the resources or takes the
 time to respond all other frameworks that are actually ready to accept
@@ -316,13 +319,45 @@ the limitations of the pessimistic locking of two-level schedulers is
 the optimistic locking approach proposed by google's Omega
 scheduler.
 
-The idea behind optimistic locking is to make the state of the cluster
-available to every framework's scheduler. When one of the framework's
-wants to run a job in the cluster it tries to commit a lock for the
-resources needed to run the task of the job. If the tasks has already
-been taken by another framework since the last update of the cluster's
-state, the framework receives the updated version of the cluster's
-state and it can retry a commit knowing the new state of the cluster.
+The idea behind Omega is to make the state of the cluster
+available to every scheduler through a data structure that its called
+cell state. When one of the frameworks wants to run a job in the
+cluster it tries to commit a lock for the resources needed to run the
+job's tasks. If the task has already been taken by another framework
+since the last update state, the framework receives the updated
+version of the cluster's state and it can retry a commit knowing the
+new state of the cluster. With this approach every scheduler can have
+an overall view of the cluster that what can allow them to make better
+scheduling decisions while having a mediation mechanism when two
+frameworks want to commit for the same resources.
+
+\subsubsection{Optimizations}
+
+The performance of this solution depends completely on how often
+conflicts happen and how this conflicts are resolved. An initial
+implementation of shared state used sequence numbers to detect
+conflicts. Whenever a machine was touched by a framework the sequence
+number for that machine was incremented and if another framework
+wanted to use the same machine it would detect the increment in the
+sequence number and signal a conflict. This implementation didn't
+performed well, showing a great deviation when compared with the best
+possible situation where the jobs run without conflicts.
+
+The main reason was that this mechanism didn't account for the level
+of utilization of the machine, and thus a machine couldn't run two
+frameworks at the same time even if the resources of the machine could
+hold both frameworks running concurrently. Besides when scheduling
+jobs, a job was refused when one of the resource allocations run into
+a conflict even if all the other tasks were well allocated,
+duplicating the amount of scheduling work to do and delaying the
+execution of tasks. To overcome this limitation a model that dealt
+with fine-grained resource allocation, where allocating could be done
+only in a subset of the machine's resources was introduced. This
+optimization added to the possibility to do incremental scheduling of
+tasks, having to retry only the conflicting tasks when the scheduling
+of a job run into a conflict gave Omega the performance expected.
+
+\subsubsection{Simulation}
 
 Glossary
 
