@@ -359,6 +359,57 @@ of a job run into a conflict gave Omega the performance expected.
 
 \subsubsection{Simulation}
 
+The more challenging problem that Omega wanted to solve was how
+to build an scheduler that could keep the pace when scheduling batch
+jobs and service jobs even if the service jobs took longer to
+schedule. To analyze the performance of the existing solutions and
+compare them with Omega the designers of the shared-state based
+scheduler built a lightweight simulator to test the behaviour of
+schedulers agains variations in the decision time for service jobs.
+
+In the simulator the decision time (time to schedule a job) was
+calculated as
+
+t\_{decis} = t\_{job} + t\_{task} x number of task
+
+where t\_{job} is an estimation of the extra time require to schedule
+every job and t\_{task} an estimation of the average time needed to
+schedule a task. Both t\_{job} and t\_{task} where taken as
+overestimations of the values obtained from google cluster's traces
+[ref] to stress test Omega a situation even more difficult than that
+Omega would find when running in a production cluster.
+
+Modifying the parameter t\_{job} allowed to simulate a longer decision
+time for service jobs and this way allowing to perceive the effect it
+has on the different scheduling models. The effects were measured
+through two metrics: job wait time and scheduler busyness. Job wait
+time represents the time that happens between the first job submission
+and the first scheduling attempt. Scheduler busynes is the fraction of
+the time that the scheduler is busy making scheduling decisions.
+
+When incrementing t\_{job} for services in the monolithic single-path
+scheduler both job wait time and busyness increased linearly till the
+scheduler reached saturation and couldn't keep with the number of jobs
+that arrived. Those were the results expected since in this kind of
+scheduler there is no parallelism and batch jobs and service jobs share
+the same scheduling logic, so a delay in scheduling services affects
+immediately batch jobs.
+
+In the case of the multipath monolithic scheduler where there is
+a fast path for scheduling batch jobs, job wait time and scheduler
+busyness are reduced but due to the lack of parallelism the queue can
+still be blocked by a service, so there is still head of line blocking.
+
+The test for the two level scheduler (Mesos) defined two independent
+schedulers, one for service jobs and another for batch jobs. In the
+test decision time for batch jobs was kept stable and that of service
+jobs varied. Mesos resource allocation algorithm based on DFR [ref]
+offers all available resources to a framework and only what is left to
+the following. This algorithm works really well when tasks are short
+and resources are freed frequently. However it didn't work well in the
+simulation because the services that had long decision times locked
+their resources and batch jobs couldn't schedule their tasks.
+
 Glossary
 
 - Frameworks (distributed application)
