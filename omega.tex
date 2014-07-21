@@ -281,36 +281,43 @@ are newly available so the master can continue offering them to the frameworks.
 
 Advantages:
 
-- Really simple central scheduler (master in Mesos terms) that has
+\begin{itemize}
+  \item
+  Really simple central scheduler (master in Mesos terms) that has
   failover 
-- Flexible: every framework decides how it schedules its tasks, the
-master only offers resources following fairness (explain what fairness is?)
-- Through offer rejection, frameworks can achieve high data locality
-only accepting offers that correspond to nodes where the data is
-stored. To avoid waiting indefinitively a technique called delayed
-scheduling (ref) has proved to achieve high data locality without
-sacrificing job execution time benefiting from the fact that tasks in
-data processing frameworks like hadoop or MPI are short so resources
-are freed frequently.
-- Scalability
-- Specialized for jobs with high chunk and where schedulers don't take
+ \item
+  Flexible: every framework decides how it schedules its tasks, the
+  master only offers resources following fairness (explain what fairness is?)
+ \item
+  Through offer rejection, frameworks can achieve high data locality
+  only accepting offers that correspond to nodes where the data is
+  stored. To avoid waiting indefinitively a technique called delayed
+  scheduling (ref) has proved to achieve high data locality without
+  sacrificing job execution time benefiting from the fact that tasks in
+  data processing frameworks like hadoop or MPI are short so resources
+  are freed frequently.
+ \item Scalability
+ \item Specialized for jobs with high chunk and where schedulers don't take
 too long. With this kind of job, resources are freed frequently and
 every framework gets its faire share of the cluster.
+\end{itemize}
 
 Disadvantages:
 
-- Difficult to place picky jobs, for example to do gang scheduling
+\begin{itemize}
+ \item Difficult to place picky jobs, for example to do gang scheduling
 frameworks in Mesos need to do resource hoarding what can lead to
 deadlocks
-- Pessimistic locking, while a framework is offered some resources it
+ \item Pessimistic locking, while a framework is offered some resources it
 holds the lock for the resource for the time the offer is
 available. For example if a framework holds the resources or takes the
 time to respond all other frameworks that are actually ready to accept
 the offer and execute the job will have to wait for the first
 framework to respond to the offer.
-- Framework scheduler written in an indirect style (adapt to the interface, 
+ \item Framework scheduler written in an indirect style (adapt to the interface, 
   take actions only when the resources are offered in an indirect away unlike
   the direct style given by optimistic locking
+\end{itemize}
 
 \subsection{Optimistic locking}
 
@@ -410,11 +417,43 @@ and resources are freed frequently. However it didn't work well in the
 simulation because the services that had long decision times locked
 their resources and batch jobs couldn't schedule their tasks.
 
-Glossary
+\section{Summary}
 
-- Frameworks (distributed application)
-- Job
-- Task
-- Data locality
+As we saw in the introduction, due to the diversity of processes that
+are executed in a cluster, the need to share data between applications
+and the scalability requirements of clusters, designing a scheduler is
+a difficult task.
+
+After a comparison of the different models of schedulers a group of
+people at Google came up with the idea of Omega, a cluster scheduler
+based on a shared-state approach that provides a good compromise
+between simplicity and the fulfillment of the scheduling requirements
+of Google's clusters. Omega can provide a good level of cluster
+utilization due to every framework knowing the current state of
+available resources for the whole cluster. It is well adapted for a
+variety of framework's scheduling needs since every framework takes
+care of doing his own scheduling and Omega only exposes the
+availability of resources and protects against allocation
+conflicts. It performs as well as the multi-path monolithic scheduler
+as it has been proven by the simulations carried out by its designers,
+even as the decision time of service jobs grows and the possibility of
+conflicts increases. Besides, it allows frameworks to dynamically
+increase or decrease the resource consumption, for example to speed up
+the execution of jobs when the cluster is under low usage.
+
+However even if Omega fits really well the context of Google cluster's
+it has its limitations. It doesn't work well when many jobs compete
+frequently for access to the same resource (e.g many batch jobs want to run
+on the same cluster node) or when cluster utilization is really high,
+since the possibility for conflicts increases and Omega doesn't
+provide a centralized way to coordinate the scheduling of different
+frameworks. This lack of a centralized intelligence makes it difficult
+to enforce global policies in the cluster or control \em{rogue}
+frameworks. For the moment Omega only provides global policies through
+a simple mechanism for dealing with priorities and through post-facto
+monitoring but this is one of the biggest axes of improvement for the
+shared-state approach.
+
+\section{Bibliography}
 
 \end{document}
