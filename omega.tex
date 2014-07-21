@@ -151,17 +151,21 @@ time a new type of workload appears.
 
 Advantages:
 
-- Control over the whole cluster (capable of taking good scheduling decisions)
-- Good cluster utilization
-- Simplest solution when there's only one framework running in the cluster
+\begin{itemize}
+  \item Control over the whole cluster (capable of taking good scheduling decisions)
+  \item Good cluster utilization
+  \item Simplest solution when there's only one framework running in the cluster
+\end{itemize}
 
 Disadvantages:
 
-- Single point of failure
-- Doesn't scale (bottleneck)
-- Can't adapt to new frameworks with new policies and needs
-- Complexity
-- It doesn't scale well when the cluster grows
+\begin{itemize}
+  \item Single point of failure
+  \item Doesn't scale (bottleneck)
+  \item Can't adapt to new frameworks with new policies and needs
+  \item Complexity
+  \item It doesn't scale well when the cluster grows
+\end{itemize}
 
 \subsection{Static partitioning}
 
@@ -180,20 +184,24 @@ categories run in different, isolated portions of the cluster the
 resources of the cluster are squandered since there exists no way for
 a category to use the resources that another category is not utilizing.
 
-Pros:
+Advantages:
 
-- Simple
-- Every framework can use their specific scheduler that is specialized
-- There's no possibility of conflicts between frameworks when
-  accessing the resources
+\begin{itemize}
+    \item Simple
+    \item Every framework can use their specific scheduler that is specialized
+    \item There's no possibility of conflicts between frameworks when
+      accessing the resources
+\end{itemize}
 
-Cons:
+Disadvantages:
 
-- Difficult to decide what is the right partition of the resources
+\begin{itemize}
+  \item Difficult to decide what is the right partition of the resources
 between frameworks
-- Non-optimal utilization of the resources of the cluster, for example
+  \item Non-optimal utilization of the resources of the cluster, for example
 if one of the frameworks is idle other framework cannot use those
 available resources since the repartition is done statically
+\end{itemize}
 
 \subsection{Two-Level scheduler}
 
@@ -448,7 +456,7 @@ on the same cluster node) or when cluster utilization is really high,
 since the possibility for conflicts increases and Omega doesn't
 provide a centralized way to coordinate the scheduling of different
 frameworks. This lack of a centralized intelligence makes it difficult
-to enforce global policies in the cluster or control \em{rogue}
+to enforce global policies in the cluster or control \emph{rogue}
 frameworks. For the moment Omega only provides global policies through
 a simple mechanism for dealing with priorities and through post-facto
 monitoring but this is one of the biggest axes of improvement for the
