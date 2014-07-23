@@ -69,13 +69,13 @@ impact in the costs and the quality of the services provided.
 However the design of a cluster scheduler is not a straightforward
 task since it has many (sometimes contradictory) requirements.
 
-From now on we will call the applications that are executed in a cluster frameworks.
-The number of frameworks for a given cluster can be high and the
-requirements for every one of them completely different. For example,
-service jobs needs are orthogonal to batch jobs needs and even
-map-reduce jobs [ref] have different constraints than MPI [ref]
-jobs despite both being used to basically process and transform
-data.
+From now on we will call the applications that are executed in a
+cluster frameworks.  The number of frameworks for a given cluster can
+be high and the requirements for every one of them completely
+different. For example, service jobs needs are orthogonal to batch
+jobs needs and even map-reduce \cite{dean_mapreduce:_2008} jobs have
+different constraints than MPI \cite{gabriel04:_open_mpi} jobs despite
+both being used to basically process and transform data.
 
 These frameworks adopt different strategies to place the
 execution of their tasks in the cluster but most of the
@@ -88,13 +88,12 @@ the assignment of resources.
 Schedulers need to be adapted to execute both batch jobs and services
 two kind of jobs that as we have seen have completely different
 requirements that sometimes conflict. Services need to be highly
-available [ref] and provide low latency demanding most of the
-resources of a cluster [ref] while batch jobs are composed of thousands of small
-tasks that can be affected by small delays in the scheduler and that
-operate over data stored in the cluster and should
-preferably be executed in the node where the data is kept but that
-provide a certain degree of flexibility to the scheduler because they
-often allow preemption.
+available and provide low latency demanding most of the resources of a
+cluster while batch jobs are composed of thousands of small tasks that
+can be affected by small delays in the scheduler and that operate over
+data stored in the cluster and should preferably be executed in the
+node where the data is kept but that provide a certain degree of
+flexibility to the scheduler because they often allow preemption.
 
 High availability is a requirement applicable to the schedulers
 themselves whose downtime affects the execution of any job to be
@@ -109,8 +108,8 @@ more prone to failure and to delays.
 In the following section we will explain some of the existing models
 of cluster schedulers considering their advantages and disadvantages
 having into account the criteria introduced in the previous
-section. Finally we will introduce the model omega [ref] proposed by
-engineers at google that aims to overcome most of the
+section. Finally we will introduce the model Omega \cite{41684}
+proposed by engineers at google that aims to overcome most of the
 limitations of the other approaches.
 
 \subsubsection{Centralized scheduler}
@@ -137,7 +136,7 @@ between the schedulers.
 
 Above all, for a centralized scheduler is difficult to adapt
 adequately to the heterogeinity of jobs that is executed in today's
-clusters [ref to google's trace]. Trying to define different
+clusters \cite{37201}. Trying to define different
 scheduling paths for the different types of workloads is difficult
 because it requires algorithms to identify the type of a job, and comes
 at the expense of the scheduler's complexity. Some schedulers try to
@@ -182,7 +181,7 @@ treat independently. This strategy is attractive because it allows to
 have an optimized dedicated scheduler for every category while being
 relatively simple since every scheduler manages its portion of the
 cluster without any risk of conflicts with the others. It was
-for a while the model chosen by companies like Yahoo [ref?].
+for a while the model chosen by companies like Yahoo.
 
 Nonetheless this strategy's drawback is that since the different 
 categories run in different, isolated portions of the cluster the
@@ -222,21 +221,21 @@ The resources of the cluster are provided by the slaves that register to
 the master at startup providing information about the amount of memory, cpu
 and network bandwith that they put at master's disposal.  
 
-This way frameworks can satisfy their needs (for example data locality [ref]) by 
+This way frameworks can satisfy their needs (for example data locality \cite{chung_maximizing_2006} ) by 
 rejecting the offers that don't interest them and accepting those who do, thus
 ensuring per framework needs despite a centralized resource manager. 
 
 However, problems start when the interests of two frameworks conflict 
 (for example two frameworks want to run their jobs in the same slave because 
 they both access the same data). In the case of data processing jobs where tasks
-don't take long to execute a technique called delay scheduling [ref] has ensured to
+don't take long to execute a technique called delay scheduling \cite{zaharia_delay_2010} has ensured to
 provide good data locality for the tasks without delaying the execution of the whole
 job. Nonetheless, when two competing frameworks use resource hoarding to incrementally 
 adcquire resources before they start a job deadlocks can emerge.
 
 At the cluster level, global policies are enforced by the way that the master 
-distributes the offers to the frameworks. A cluster manager like Mesos [ref] provides two
-policies one based on fairness [ref] and another on strict priorities, custom policies can
+distributes the offers to the frameworks. A cluster manager like Mesos \cite{Hindman10mesos:a} provides two
+policies one based on fairness \cite{AjtaiANRSW1998} and another on strict priorities, custom policies can
 also be implemented.
 
 (It is still a weak way to enforce global policies, if we were to define a complex
@@ -244,9 +243,9 @@ policy it would stil be difficult to implement it like that)
 
 Failover on the master is provided with machines that run as backups of the master and
 are capable to restore the master's state when it falls. Schedulers and slaves can find
-the new master to register to with centralized configuration services like Zookeeper [ref].
+the new master to register to with centralized configuration services like Zookeeper \cite{_apache_????}.
 
-Partitioning of the resources of the cluster is provided thanks to linux containers [ref]
+Partitioning of the resources of the cluster is provided thanks to linux containers \cite{_linux_????}
 an isolation technique that allows to run processes in an allocated subset of the 
 resources of the machine without interferences from other processes. 
 
