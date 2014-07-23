@@ -1,6 +1,14 @@
 *.swo
+*.swp
 *~
 *.aux
 *.dvi
 *.log
 omega.pdf
+*.blg
+*.bbl
+*.bcf
+presentation.nav
+presentation.out
+presentation.snm
+presentation.toc

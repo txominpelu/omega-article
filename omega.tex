@@ -1,8 +1,12 @@
 
 \documentclass{svjour3}                     % onecolumn (standard format)
-\usepackage[spanish, english, activeacute]{babel} %Definir idioma español
+\usepackage[english, activeacute]{babel} %Definir idioma español
 \usepackage[utf8]{inputenc} %Codificacion utf-8
 \usepackage[autostyle]{csquotes}
+\usepackage[backend=biber]{biblatex}
+\usepackage[T1]{fontenc}
+\addbibresource{omega-article.bib}
+\addbibresource{other.bib}
 
 \begin{document}
 
@@ -10,7 +14,7 @@
 
 %\titlerunning{Short form of title}        % if too long for running head
 
-\author{ Íñigo Mediavilla }
+\author{ Inigo Mediavilla }
 \institute{ UPMC Master STL \at
               \email{imediava@gmail.com}           %  \\
 }
@@ -22,14 +26,15 @@
 \begin{abstract}
 This article describes the scheduler called Omega developed by
 engineers at Google. It starts by providing an introduction to the
-main problems that the design of a scheduler has to face mainly the
-diversity of scheduling strategies that the different applications
-implement and that schedulers need to support while remaining capable
-of taking scheduling quick enough to avoid delaying the execution of
-jobs. Then it provides a description of the main alternatives that
-have been proposed to this problems to finally explain the solution
-advocated by Omega.
-\keywords{Scala \and Reflection \and Macro }
+main problems that the design of a scheduler has to face, mainly the
+diversity of scheduling strategies that it needs to support
+while remaining capable of taking quick scheduling decisions. Then it
+provides a description of the main alternatives that have been
+proposed to this problems. Finally it explains the solution advocated
+by Omega, describing the shared-state approach model adopted and
+providing the results of a set of simulations carried out over an
+implementation of Omega.
+\keywords{ Scheduling \and Resource management \and Cluster }
 % \PACS{PACS code1 \and PACS code2 \and more}
 % \subclass{MSC code1 \and MSC code2 \and more}
 \end{abstract}
@@ -38,26 +43,26 @@ advocated by Omega.
 
 \subsection{Importance of scheduling}
 
-Scheduling is planning the execution of a
-set of computations that we'll call jobs in an execution environment
-with a limited amount of resources. Initially scheduling was studied
-in the context of operating systems, however more recently with the
-popularization (?) of datacenters a different range of scheduling
-techniques are being applied for the allocation of resources in
-clusters. 
+Scheduling is planning the execution of a set of computations that
+are called jobs in an execution environment with a limited amount of
+resources. Initially scheduling was studied in the context of
+operating systems but more recently with the popularization 
+of datacenters a different range of scheduling techniques are being
+applied for the allocation of clusters' resources.
 
 Clusters can run both batch jobs and long running jobs (services), two
 types of jobs that represent two completely different requirements.
-The former requires most of the resources in a cluster however most of
-the jobs executed in modern clusters (google, yahoo references) are
-batch jobs with short timespan.
+The former requires most of the resources in a cluster and can have
+complex placement requirements. The latter concentrates most of the scheduling
+effort with most jobs being batch jobs (> 80\%) according to the publicly
+released traces of the clusters of Yahoo \cite{parashar_10th_2010}, Google \cite{mishra_towards_2010} and Facebook \cite{Chen:EECS-2012-17}.
 
-One can measure the good use of a cluster by considering if the
+The good use of a cluster can be measured by considering if the
 quality constraints required by services are satisfied, the execution
 time of batch jobs and the percentage of cluster utilization. The
 quality of the scheduling algorithm used for a cluster affects all
-these metrics so having a good scheduling algorithm has a great
-impact in terms of costs and quality of the services provided.
+these metrics for that reason having a good scheduling algorithm has a big
+impact in the costs and the quality of the services provided.
 
 \subsection{Difficulties (Problematica) with cluster scheduling}
 
@@ -463,5 +468,9 @@ monitoring but this is one of the biggest axes of improvement for the
 shared-state approach.
 
 \section{Bibliography}
+
+
+\printbibliography
+
 
 \end{document}
