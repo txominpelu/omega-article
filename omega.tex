@@ -281,8 +281,8 @@ of the resources offered by the master.
 resources inside containers in the slaves specified in the response and it launches the
 process to compute the task. To be able to run the tasks the slave obviously needs to 
 have access to the binaries to run the process what is usually done either making the
-binaries accessible to the whole cluster through a distributed filesystem like HDFS [ref]
-or S3[ref] or by ensuring manually that the slaves have all the binaries in a public
+binaries accessible to the whole cluster through a distributed filesystem like the Google File System \cite{ghemawat_google_2003}
+or Amazon's S3 \cite{_aws_????} or by ensuring manually that the slaves have all the binaries in a public
 accessible folder.
 \item Once the computation has finished the slave notifies the master that the resources
 are newly available so the master can continue offering them to the frameworks.
@@ -304,7 +304,7 @@ Advantages:
   Through offer rejection, frameworks can achieve high data locality
   only accepting offers that correspond to nodes where the data is
   stored. To avoid waiting indefinitively a technique called delayed
-  scheduling (ref) has proved to achieve high data locality without
+  scheduling \cite{zaharia_delay_2010} has proved to achieve high data locality without
   sacrificing job execution time benefiting from the fact that tasks in
   data processing frameworks like hadoop or MPI are short so resources
   are freed frequently.
@@ -395,7 +395,7 @@ where t\_{job} is an estimation of the extra time require to schedule
 every job and t\_{task} an estimation of the average time needed to
 schedule a task. Both t\_{job} and t\_{task} where taken as
 overestimations of the values obtained from google cluster's traces
-[ref] to stress test Omega a situation even more difficult than that
+\cite{37201} to stress test Omega a situation even more difficult than that
 Omega would find when running in a production cluster.
 
 Modifying the parameter t\_{job} allowed to simulate a longer decision
@@ -422,12 +422,13 @@ still be blocked by a service, so there is still head of line blocking.
 The test for the two level scheduler (Mesos) defined two independent
 schedulers, one for service jobs and another for batch jobs. In the
 test decision time for batch jobs was kept stable and that of service
-jobs varied. Mesos resource allocation algorithm based on DFR [ref]
-offers all available resources to a framework and only what is left to
-the following. This algorithm works really well when tasks are short
-and resources are freed frequently. However it didn't work well in the
-simulation because the services that had long decision times locked
-their resources and batch jobs couldn't schedule their tasks.
+jobs varied. Mesos resource allocation algorithm based on using
+fairness for offering resources to the frameworks offers all available
+resources to a framework and only what is left to the following. This
+algorithm works really well when tasks are short and resources are
+freed frequently. However it didn't work well in the simulation
+because the services that had long decision times locked their
+resources and batch jobs couldn't schedule their tasks.
 
 \section{Summary}
 
