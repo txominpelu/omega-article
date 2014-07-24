@@ -24,16 +24,23 @@
 \maketitle
 
 \begin{abstract}
+
+Scheduling has a great impact in the well functioning of a cluster in
+terms of quality of service and running costs.  Unfortunately
+designing a cluster scheduler is a difficult task, mainly due to the
+diversity of scheduling strategies that the scheduler needs to support
+while remaining capable of taking quick scheduling decision.
+
 This article describes the scheduler called Omega developed by
-engineers at Google. It starts by providing an introduction to the
-main problems that the design of a scheduler has to face, mainly the
-diversity of scheduling strategies that it needs to support
-while remaining capable of taking quick scheduling decisions. Then it
-provides a description of the main alternatives that have been
-proposed to this problems. Finally it explains the solution advocated
-by Omega, describing the shared-state approach model adopted and
-providing the results of a set of simulations carried out over an
-implementation of Omega.
+engineers at Google that provides a simple strategy based on a
+shared-state approach to allow frameworks to schedule their jobs
+independently and mediation to resolve conflicting demands. 
+
+Omega's approach results in an architecture where there is a simple 
+mediator that performs well even as the cluster grows and a set of
+modular framework schedulers that have the flexibility to schedule
+the way they want and use all the available resources of the cluster.
+
 \keywords{ Scheduling \and Resource management \and Cluster }
 % \PACS{PACS code1 \and PACS code2 \and more}
 % \subclass{MSC code1 \and MSC code2 \and more}
