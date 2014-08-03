@@ -226,8 +226,8 @@ the offers, notifying the master of the tasks they want to run and the
 resources they want to run them on, or reject them.
 
 The resources of the cluster are provided by the slaves that register to 
-the master at startup providing information about the amount of memory, cpu
-and network bandwith that they put at master's disposal.  
+the master at startup providing information about the amount of memory, CPU
+and network bandwidth  that they put at master's disposal.  
 
 Frameworks can satisfy their needs (for example data locality \cite{chung_maximizing_2006} ) by 
 rejecting the offers that don't interest them and accepting those who do, thus
@@ -241,7 +241,7 @@ the case of data processing jobs where tasks don't take long to
 execute a technique called delay scheduling \cite{zaharia_delay_2010}
 manages to provide good data locality for the tasks without delaying
 the execution of the whole job. Nonetheless, when two competing
-frameworks use resource hoarding to incrementally adcquire resources
+frameworks use resource hoarding to incrementally acquire resources
 before they start a job deadlocks can emerge.
 
 At the cluster level, global policies are enforced by the way that the
@@ -252,17 +252,17 @@ custom policies can also be implemented. However if this policies are
 too simple the central scheduler of Mesos can be extended with new
 policies.
 
-Failover on the master is provided with machines that run as backups of the master and
+Fail-over on the master is provided with machines that run as backups of the master and
 are capable to restore the master's state when it falls. Schedulers and slaves can find
 the new master to register to with centralized configuration services like Zookeeper \cite{_apache_????}.
 
-Partitioning of the resources of the cluster is provided thanks to linux containers \cite{_linux_????}
+Partitioning of the resources of the cluster is provided thanks to Linux containers \cite{_linux_????}
 an isolation technique that allows to run processes in an allocated subset of the 
 resources of the machine without interferences from other processes. 
 
 An optimization to the model of resource offers is the possibility for the frameworks
 to define filters that describe the kinds of offers that a framework will not be interested
-in, this way avoiding innecesary exchanges between the slaves and the masters.
+in, this way avoiding unnecessary exchanges between the slaves and the masters.
 
 \subsubsection{Execution process}
 
@@ -310,22 +310,22 @@ Advantages:
 \begin{itemize}
   \item
   Really simple central scheduler (master in Mesos terms) that has
-  failover 
+  fail-over 
  \item
   Flexible: every framework decides how it schedules its tasks, the
   master only offers resources following fairness 
  \item
   Through offer rejection, frameworks can achieve high data locality
   only accepting offers that correspond to nodes where the data is
-  stored. To avoid waiting indefinitively a technique called delayed
+  stored. To avoid waiting indefinitely a technique called delayed
   scheduling \cite{zaharia_delay_2010} has proved to achieve high data locality without
   sacrificing job execution time benefiting from the fact that tasks in
-  data processing frameworks like hadoop or MPI are short so resources
+  data processing frameworks like Hadoop or MPI are short so resources
   are freed frequently.
  \item Scalability
  \item Specialized for jobs with high chunk and where schedulers don't take
 too long. With this kind of job, resources are freed frequently and
-every framework gets its faire share of the cluster.
+every framework gets its fair share of the cluster.
 \end{itemize}
 
 Disadvantages:
@@ -349,7 +349,7 @@ framework to respond to the offer.
 
 Another approach to cluster scheduling that tries to overcome some of
 the limitations of the pessimistic locking of two-level schedulers is
-the optimistic locking approach proposed by google's Omega
+the optimistic locking approach proposed by Google's Omega
 scheduler.
 
 The idea behind Omega is to make the state of the cluster
@@ -397,15 +397,13 @@ to build an scheduler that could keep the pace when scheduling batch
 jobs and service jobs even if the service jobs took longer to
 schedule. To analyze the performance of the existing solutions and
 compare them with Omega the designers of the shared-state based
-scheduler built a lightweight simulator to test the behaviour of
-schedulers agains variations in the decision time for service jobs.
+scheduler built a lightweight simulator to test the behavior of
+schedulers against variations in the decision time for service jobs.
 
 In the simulator the decision time (time to schedule a job) was
 calculated as
-
-t\_{decis} = t\_{job} + t\_{task} x number of task
-
-where t\_{job} is an estimation of the extra time require to schedule
+$t_{decis}\ =\ t_{job}\ +\ t_{task}\ \times$ \emph{number of tasks}
+where t\_{job} is an estimation of the extra time required to schedule
 every job and t\_{task} an estimation of the average time needed to
 schedule a task. Both t\_{job} and t\_{task} where taken as
 overestimations of the values obtained from google cluster's traces
@@ -417,7 +415,7 @@ time for service jobs and this way allowing to perceive the effect it
 has on the different scheduling models. The effects were measured
 through two metrics: job wait time and scheduler busyness. Job wait
 time represents the time that happens between the first job submission
-and the first scheduling attempt. Scheduler busynes is the fraction of
+and the first scheduling attempt. Scheduler busyness is the fraction of
 the time that the scheduler is busy making scheduling decisions.
 
 When incrementing t\_{job} for services in the monolithic single-path
@@ -428,7 +426,7 @@ scheduler there is no parallelism and batch jobs and service jobs share
 the same scheduling logic, so a delay in scheduling services affects
 immediately batch jobs.
 
-In the case of the multipath monolithic scheduler where there is
+In the case of the multi-path monolithic scheduler where there is
 a fast path for scheduling batch jobs, job wait time and scheduler
 busyness are reduced but due to the lack of parallelism the queue can
 still be blocked by a service, so there is still head of line blocking.
