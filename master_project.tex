@@ -1,0 +1,55 @@
+\documentclass{svjour3}                     % onecolumn (standard format)
+\usepackage[english, activeacute]{babel} %Definir idioma español
+\usepackage[utf8]{inputenc} %Codificacion utf-8
+\usepackage[autostyle]{csquotes}
+\usepackage[backend=biber]{biblatex}
+
+\begin{document}
+
+\title{ Applying smart policies to dynamic resource managers }
+
+%\titlerunning{Short form of title}        % if too long for running head
+
+\author{ Inigo Mediavilla }
+\institute{ UPMC Master STL \at
+              \email{imediava@gmail.com}           %  \\
+}
+
+\date{\today}
+
+\maketitle
+
+\begin{abstract}
+TODO
+\end{abstract}
+
+\section{Experiments}
+Two-level schedulers have been proven to deal badly with long scheduling decision times and
+when resources are not freed frequently, providing a non-optimal utilization of the resources
+of the cluster.
+
+Omega doesn't have a clear policy to mediate between frameworks to provide coordination so 
+that the execution can be improved.
+
+Examples of situations where some global policies can improve the performance of the cluster:
+
+ - A job takes most of the resources but it won't finish soon while other jobs would finish
+   quickly but they are not given the opportunity to use the resources
+ - A job that many other jobs depend on is ignored while other job whose execution is less
+   relevant is executed first
+ - A job that can run dynamically adjusting it's size takes resources of other job that needs
+  a fixed amount
+
+How many of those examples cannot be resolved with priorities? 
+
+
+\section{Experiments}
+
+
+\section{Bibliography}
+
+
+\printbibliography
+
+
+\end{document}
