@@ -25,12 +25,28 @@ TODO
 
 %% Idea:
 
+
 %% Split into small improvements to the things that are not explained in the Omega paper
+%% The simulator created can help prove the situation where some of the schedulers doesn't
+%% work well and to test some of the improvements' performance.
+%%
 %% 1. Explaining how to deal with giving preference based on business value
 %%    - Show in what situations just mediation for conflicts is not enough
 %%       - When some jobs have more priority than others for any allocation (superjobs, e.g services)
+%%           (Easy, higher priority jobs can preempt lower priority jobs but not
+%%            the opposite - 
+%%               -Means that higher priority jobs must behave with responsability 
+%%               -Lower priority jobs need to allow preemption
+%%               - Can there be any low priority - non-preemptive jobs? why? How to
+%%                 deal with that?
+%%               - On preemption jobs need to be notified 
+
 %%       - When some jobs have more priority than others for certain allocations (play with
 %%         bidding to ensure fairness between same-level frameworks)
+%%          - What to base bidding on?
+%%             - Job almost finished
+%%             - Many other tasks depend on one
+%%             - Lower bidding for extending the resources dynamically
 %%       - What jobs allow preemption and what jobs don't?
 %%
 %%   1.1. How can monitoring ensure a good use of the cluster and the fairness provided
