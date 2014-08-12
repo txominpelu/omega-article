@@ -23,6 +23,24 @@
 TODO
 \end{abstract}
 
+%% Idea:
+
+%% Split into small improvements to the things that are not explained in the Omega paper
+%% 1. Explaining how to deal with giving preference based on business value
+%%    - Show in what situations just mediation for conflicts is not enough
+%%       - When some jobs have more priority than others for any allocation (superjobs, e.g services)
+%%       - When some jobs have more priority than others for certain allocations (play with
+%%         bidding to ensure fairness between same-level frameworks)
+%%       - What jobs allow preemption and what jobs don't?
+%%
+%%   1.1. How can monitoring ensure a good use of the cluster and the fairness provided
+%%        by policies?
+%%       - Show on simulations of how good and bad fairness levels can be detected and
+%%         what can cause a bad fairness level (e.g rogue frameworks, faster
+%% 
+%% 2. How Omega can be improved when two (or many) jobs want to work over the same data 
+%%    (e.g in case of conflicts when do they retry, how to optimize that?)
+
 \section{Experiments}
 Two-level schedulers have been proven to deal badly with long scheduling decision times and
 when resources are not freed frequently, providing a non-optimal utilization of the resources
