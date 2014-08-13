@@ -331,18 +331,27 @@ every framework gets its fair share of the cluster.
 Disadvantages:
 
 \begin{itemize}
+ \item This kind of scheduling encourages frameworks to demand more
+   resources than they actually need in preparation for everything
+   they want to run. If a framework wants to run a list of tasks in
+   many steps it will demand resources for the whole process even if
+   many resources will be idle during most steps.
  \item Difficult to place picky jobs, for example to do gang scheduling
 frameworks in Mesos need to do resource hoarding what can lead to
 deadlocks
- \item Pessimistic locking, while a framework is offered some resources it
+ \item When a framework is offered some resources it
 holds the lock for the resource for the time the offer is
-available. For example if a framework holds the resources or takes the
+available. If a framework hoards the resources or takes a long
 time to respond all other frameworks that are actually ready to accept
-the offer and execute the job will have to wait for the first
+the offer and execute their jobs will have to wait for the first
 framework to respond to the offer.
- \item Framework scheduler written in an indirect style (adapt to the interface, 
-  take actions only when the resources are offered in an indirect away unlike
-  the direct style given by optimistic locking
+
+For example in clusters that run service jobs or jobs with complex
+placement constraints that take long time to schedule the performance
+of two-level schedulers suffers.
+
+ \item Framework schedulers are written in an indirect style. They
+  take actions only when the resources are offered. 
 \end{itemize}
 
 \subsection{Optimistic locking}
@@ -352,17 +361,16 @@ the limitations of the pessimistic locking of two-level schedulers is
 the optimistic locking approach proposed by Google's Omega
 scheduler.
 
-The idea behind Omega is to make the state of the cluster
-available to every scheduler through a data structure that its called
-cell state. When one of the frameworks wants to run a job in the
-cluster it tries to commit a lock for the resources needed to run the
-job's tasks. If the task has already been taken by another framework
-since the last update state, the framework receives the updated
-version of the cluster's state and it can retry a commit knowing the
-new state of the cluster. With this approach every scheduler can have
-an overall view of the cluster that what can allow them to make better
-scheduling decisions while having a mediation mechanism when two
-frameworks want to commit for the same resources.
+The idea behind Omega is to make the state of the cluster available to
+every scheduler through a data structure that its called cell
+state. When one of the frameworks wants to run a job in the cluster it
+tries to commit a lock for the resources needed to run the job's
+tasks. If the resource has already been taken by another framework
+since the last update, the framework receives the updated version of
+the cluster and it can retry a commit of available resources. With
+this approach every scheduler has an overall view of the cluster what
+allows them to make better scheduling decisions while having a
+mediation mechanism when two frameworks want to commit for the same resources.
 
 \subsubsection{Optimizations}
 
@@ -376,19 +384,18 @@ sequence number and signal a conflict. This implementation didn't
 performed well, showing a great deviation when compared with the best
 possible situation where the jobs run without conflicts.
 
-The main reason was that this mechanism didn't account for the level
-of utilization of the machine, and thus a machine couldn't run two
-frameworks at the same time even if the resources of the machine could
-hold both frameworks running concurrently. Besides when scheduling
-jobs, a job was refused when one of the resource allocations run into
-a conflict even if all the other tasks were well allocated,
-duplicating the amount of scheduling work to do and delaying the
-execution of tasks. To overcome this limitation a model that dealt
-with fine-grained resource allocation, where allocating could be done
-only in a subset of the machine's resources was introduced. This
-optimization added to the possibility to do incremental scheduling of
-tasks, having to retry only the conflicting tasks when the scheduling
-of a job run into a conflict gave Omega the performance expected.
+The main reason was that this mechanism didn't consider that a machine
+can have available resources even if a framework is already running
+tasks on it. Besides when scheduling jobs, a job was refused when one
+of the resource allocations for a particular task run into a
+conflict even if all the other tasks were well allocated, duplicating
+the amount of scheduling work to do and delaying the execution of
+tasks. To overcome the first limitation a model that dealt with
+fine-grained resource allocation, where allocation could be done only
+in a subset of the machine's resources was introduced. Another
+optimization added the possibility to do incremental scheduling of
+tasks as well, having to retry only the unscheduled tasks after a
+conflict. These two optimizations gave Omega the performance expected.
 
 \subsubsection{Simulation}
 
@@ -396,29 +403,28 @@ The more challenging problem that Omega wanted to solve was how
 to build an scheduler that could keep the pace when scheduling batch
 jobs and service jobs even if the service jobs took longer to
 schedule. To analyze the performance of the existing solutions and
-compare them with Omega the designers of the shared-state based
+compare them with Omega, the designers of the shared-state based
 scheduler built a lightweight simulator to test the behavior of
 schedulers against variations in the decision time for service jobs.
 
 In the simulator the decision time (time to schedule a job) was
 calculated as
 $t_{decis}\ =\ t_{job}\ +\ t_{task}\ \times$ \emph{number of tasks}
-where t\_{job} is an estimation of the extra time required to schedule
-every job and t\_{task} an estimation of the average time needed to
-schedule a task. Both t\_{job} and t\_{task} where taken as
-overestimations of the values obtained from google cluster's traces
-\cite{37201} to stress test Omega a situation even more difficult than that
-Omega would find when running in a production cluster.
+where $t_{job}$ is an estimation of the extra time required to schedule
+every job and $t_{task}$ an estimation of the average time needed to
+schedule a task. Both $t_{job}$ and $t_{task}$ where taken as
+overestimations of the values obtained from Google cluster's traces
+\cite{37201}. 
 
-Modifying the parameter t\_{job} allowed to simulate a longer decision
-time for service jobs and this way allowing to perceive the effect it
-has on the different scheduling models. The effects were measured
-through two metrics: job wait time and scheduler busyness. Job wait
-time represents the time that happens between the first job submission
-and the first scheduling attempt. Scheduler busyness is the fraction of
+Modifying the parameter $t_{job}$ allowed to simulate a longer
+decision time for service jobs to perceive the effect this has on the
+different scheduling models. The effects were measured through two
+metrics: job wait time and scheduler busyness. Job wait time
+represents the time that happens between the first job submission and
+the first scheduling attempt. Scheduler busyness is the fraction of
 the time that the scheduler is busy making scheduling decisions.
 
-When incrementing t\_{job} for services in the monolithic single-path
+When incrementing $t_{job}$ for services in the monolithic single-path
 scheduler both job wait time and busyness increased linearly till the
 scheduler reached saturation and couldn't keep with the number of jobs
 that arrived. Those were the results expected since in this kind of
@@ -428,12 +434,12 @@ immediately batch jobs.
 
 In the case of the multi-path monolithic scheduler where there is
 a fast path for scheduling batch jobs, job wait time and scheduler
-busyness are reduced but due to the lack of parallelism the queue can
+busyness are reduced but due to the lack of total parallelism the queue can
 still be blocked by a service, so there is still head of line blocking.
 
 The test for the two level scheduler (Mesos) defined two independent
 schedulers, one for service jobs and another for batch jobs. In the
-test decision time for batch jobs was kept stable and that of service
+test, decision time for batch jobs was kept stable and that of service
 jobs varied. Mesos resource allocation algorithm based on using
 fairness for offering resources to the frameworks offers all available
 resources to a framework and only what is left to the following. This
