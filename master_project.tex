@@ -23,6 +23,62 @@
 TODO
 \end{abstract}
 
+\section{Introduction}
+
+
+
+\section{Priorities}
+
+A really simple yet fairly powerful way to consider business needs when many frameworks
+want to use the same resources at the same time is assigning priorities. In the competition
+for resources, tasks with higher priorities will always win against lower priority tasks. In
+the case where lower priority taks have already their resources assigned preemption will be
+used to ensure that the order is respected and that low priority tasks don't slow down high
+priority tasks even if this causes some overhead for the duplicated effort that lower priority
+tasks need to do when they're preempted.
+
+In practice this works well because by assigning the higher priority to the services, 
+that provide the higher business value [ref], we can ensure their high availability since 
+no other job can preempt them, and give them exactly the resources they need. Assigning the 
+Lower priority levels to batch jobs works well because jobs are usually less important
+than services but specially because they're more flexible in the allocation of their tasks,
+and they deal well with preemption.
+
+
+%% Idea:
+
+
+%% Split into small improvements to the things that are not explained in the Omega paper
+%% The simulator created can help prove the situation where some of the schedulers doesn't
+%% work well and to test some of the improvements' performance.
+%%
+%% 1. Explaining how to deal with giving preference based on business value
+%%    - Show in what situations just mediation for conflicts is not enough
+%%       - When some jobs have more priority than others for any allocation (superjobs, e.g services)
+%%           (Easy, higher priority jobs can preempt lower priority jobs but not
+%%            the opposite - 
+%%               -Means that higher priority jobs must behave with responsability 
+%%               -Lower priority jobs need to allow preemption (or provide interruptions - can stand-by)
+%%               - Can there be any low priority - non-preemptive jobs? why? How to
+%%                 deal with that?
+%%               - On preemption jobs need to be notified 
+
+%%       - When some jobs have more priority than others for certain allocations (play with
+%%         bidding to ensure fairness between same-level frameworks)
+%%          - What to base bidding on?
+%%             - Job almost finished
+%%             - Many other tasks depend on one
+%%             - Lower bidding for extending the resources dynamically
+%%       - What jobs allow preemption and what jobs don't?
+%%
+%%   1.1. How can monitoring ensure a good use of the cluster and the fairness provided
+%%        by policies?
+%%       - Show on simulations of how good and bad fairness levels can be detected and
+%%         what can cause a bad fairness level (e.g rogue frameworks, faster
+%% 
+%% 2. How Omega can be improved when two (or many) jobs want to work over the same data 
+%%    (e.g in case of conflicts when do they retry, how to optimize that?)
+
 \section{Experiments}
 Two-level schedulers have been proven to deal badly with long scheduling decision times and
 when resources are not freed frequently, providing a non-optimal utilization of the resources
