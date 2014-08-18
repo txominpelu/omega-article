@@ -4,6 +4,9 @@
 \usepackage[autostyle]{csquotes}
 \usepackage[backend=biber]{biblatex}
 
+\addbibresource{omega-article.bib}
+\addbibresource{other.bib}
+
 \begin{document}
 
 \title{ Applying smart policies to dynamic resource managers }
@@ -24,6 +27,319 @@ TODO
 \end{abstract}
 
 \section{Introduction}
+
+Scheduling is planning the execution of a set of computations that
+are called jobs in an execution environment with a limited amount of
+resources.
+
+If we consider the size of the clusters of the biggest companies
+in the web, their resource consumption and the economical value of the
+applications that run on them we can quickly realize of the
+economical, ecological and business impact of a good utilization of
+these clusters that depends significantly on the quality of
+the schedulers that allocate their resources.
+
+Besides, with the advention of the cloud platforms the ``prestation'' of clusters
+has become a business in itself. Initially thought for hosting
+webservers, databases and distributed services virtual machines
+are finding other uses for their computational resources such as
+distributed parallel processing that increases the possibility
+of manipulate and make sense out of bigger amounts of data. This
+different uses of cluster resources increases
+even more the importance of the process of scheduling as well of the
+complexity to handle all the different kinds of applications.
+
+%% why is scheduling important?
+%% - Big data centers
+%% - + recently generalized clusters
+%% - + amazon and other clouds
+%% - + popularity of parallel processing frameworks
+
+This relevance of the scheduling process constitutes a good
+incentivation for the scientific community to try to find the best
+scheduling strategies to optimize the utilization of clusters. An
+incentivation that can be facilitated by the public release of the
+traces of the clusters of many big companies like [ref] that allow
+anyone interested in testing improvements to the existing scheduling
+models to try them against the real production traces of the clusters
+of the biggest companies.
+%% The public release of the traces of many clusters [refs] has
+%% make it possible for those interested to implement cluster
+%% schedulers and test them against the traces.
+
+%% Difficulties
+
+%% Explain quickly what are the difficulties for the implementation
+%% of schedulers (can take it from the abstract of the other article):
+
+Scheduling has a great impact in the well functioning of a cluster in
+terms of quality of service and running costs.  Unfortunately
+designing a cluster scheduler is a difficult task, mainly due to the
+diversity of scheduling strategies that the scheduler needs to support
+while remaining capable of taking quick scheduling decisions.
+
+%% Scheduling also consists in providing an abstraction layer for
+%% computations to execute their jobs in a distributed environment
+%% without having to manage the distribution of the computations
+%% or the binaries to execute them.
+
+
+%% Succintly explain the main problems of the main approaches
+%% (forward reference) and the Omega alternative (forward reference)
+
+%% Explain the limitations of Omega (for later)
+The good use of a cluster can be measured by considering if the
+quality constraints required by services are satisfied, the execution
+time of batch jobs and the percentage of cluster utilization. The
+quality of the scheduling algorithm used for a cluster affects all
+these metrics for that reason having a good scheduling algorithm has a big
+impact in the costs and the quality of the services provided.
+
+\section{Other approaches}
+
+\subsection{Solutions for coordinated cluster scheduling}
+
+In the following section we will explain some of the existing models
+of cluster schedulers considering their advantages and disadvantages
+having into account the criteria introduced in the previous
+section. Finally we will introduce the model Omega \cite{41684}
+proposed by engineers at google that aims to overcome many of the
+limitations of the other approaches.
+
+\subsubsection{Centralized scheduler}
+
+The first schedulers were designed following a monolithic architecture
+with a central scheduler taking care of distributing the execution
+of jobs across the nodes of the cluster. This design has, at least in
+the beginning, the advantage of being simple since there's only one
+scheduler assigning resources. The central scheduler controls the
+state of the whole cluster, what makes it capable of taking really
+good scheduling decisions specially when all jobs have the same
+scheduling requirements. 
+
+However this design that is simple and capable of taking good
+decisions in the beginning, has many problems as the size of the
+cluster increases or as the jobs executed in the cluster
+diversify. When the number of jobs to execute increases, the central
+scheduler needs to be able to keep with the pace of jobs that are
+planned. On top of that a single scheduler represents a single point
+of failure. Parallelization can atenuate both problems but just at the
+expense of adding complexity and introducing the need for synchronization
+between the schedulers.
+
+Above all, for a centralized scheduler it is difficult to adapt
+adequately to the heterogeinity of jobs that is executed in today's
+clusters \cite{37201}. Trying to define different
+scheduling paths for the different types of workloads is difficult
+because it requires algorithms to identify the type of a job, and comes
+at the expense of the scheduler's complexity. Some schedulers try to
+support different policies by implement really complex algorithms
+involving different weighting factors that provide rough
+approximations of the objectives of every kind of workload. Others
+like google's run different scheduling logic for every kind of
+workload but it usually implies that users of the scheduler need to
+have a really good understanding of the internals of the scheduling
+algorithm to be able to optimize the execution of jobs. In both cases
+the solution implies an additional layer of complexity to an already
+difficult task.
+
+Besides this model requires modifying the code of the scheduler every
+time a new type of workload appears. 
+
+Advantages:
+
+\begin{itemize}
+  \item Control over the whole cluster. The scheduler is capable of taking good scheduling decisions.
+  \item Good cluster utilization
+  \item Simplest solution when there's only one framework running in the cluster
+\end{itemize}
+
+Disadvantages:
+
+\begin{itemize}
+  \item Single point of failure
+  \item Doesn't scale. The central scheduler is a bottleneck and
+    slower jobs block other jobs that are faster to schedule.
+  \item Can't adapt to new frameworks with new policies and needs
+  \item Complexity
+\end{itemize}
+
+\subsection{Static partitioning}
+
+To overcome the limitations that the previous model had when dealing
+with clusters where the are many kinds of jobs with different scheduling
+needs, static partitioning allows to split the resources of the cluster
+in as many partitions as the kinds of jobs that we want to
+treat independently. This strategy is attractive because it allows to
+have an optimized dedicated scheduler for every kind while being
+relatively simple since every scheduler manages its portion of the
+cluster without any risk of conflicts with the others. It was
+for a while the model chosen by companies like Yahoo.
+
+Nonetheless this strategy's drawback is that since the different 
+categories run in different, isolated portions of the cluster the
+resources of the cluster are wasted since it is not possible for
+a partition to use the resources that another partition is not using.
+
+Advantages:
+
+\begin{itemize}
+    \item Simple
+    \item Every framework can use their specific scheduler that is specialized
+    \item There's no possibility of conflicts between frameworks when
+      accessing the resources
+\end{itemize}
+
+Disadvantages:
+
+\begin{itemize}
+  \item Difficult to decide what is the right partition of the resources
+between frameworks
+  \item Non-optimal utilization of the resources of the cluster, for example
+if one of the frameworks is idle other framework cannot use those
+available resources since the repartition is done statically
+\end{itemize}
+
+\subsection{Two-Level scheduler}
+
+Two level schedulers give applications, also called
+frameworks, the ability to schedule their tasks independently while
+having access to all the resources available in the cluster. This
+is achieved with an architecture that is based in a master that manages
+the cluster's resources and offers them to the frameworks who can accept 
+the offers, notifying the master of the tasks they want to run and the
+resources they want to run them on, or reject them.
+
+The resources of the cluster are provided by the slaves that register to 
+the master at startup providing information about the amount of memory, CPU
+and network bandwidth  that they put at master's disposal.  
+
+Frameworks can satisfy their needs (for example data locality \cite{chung_maximizing_2006} ) by 
+rejecting the offers that don't interest them and accepting those who do, thus
+ensuring per framework needs despite a centralized resource manager. 
+
+When the interests of two frameworks conflict, for example two
+frameworks want to run their jobs in the same slave because they both
+access the same data, there are techniques to ensure that all
+frameworks can have their fair share of the resources they need. In
+the case of data processing jobs where tasks don't take long to
+execute a technique called delay scheduling \cite{zaharia_delay_2010}
+manages to provide good data locality for the tasks without delaying
+the execution of the whole job. Nonetheless, when two competing
+frameworks use resource hoarding to incrementally acquire resources
+before they start a job deadlocks can emerge.
+
+At the cluster level, global policies are enforced by the way that the
+master distributes the offers to the frameworks. A cluster manager
+like Mesos \cite{Hindman10mesos:a} provides two policies one based on
+fairness \cite{AjtaiANRSW1998} and another on strict priorities,
+custom policies can also be implemented. However if this policies are
+too simple the central scheduler of Mesos can be extended with new
+policies.
+
+Fail-over on the master is provided with machines that run as backups of the master and
+are capable to restore the master's state when it falls. Schedulers and slaves can find
+the new master to register to with centralized configuration services like Zookeeper \cite{_apache_????}.
+
+Partitioning of the resources of the cluster is provided thanks to Linux containers \cite{_linux_????}
+an isolation technique that allows to run processes in an allocated subset of the 
+resources of the machine without interferences from other processes. 
+
+An optimization to the model of resource offers is the possibility for the frameworks
+to define filters that describe the kinds of offers that a framework will not be interested
+in, this way avoiding unnecessary exchanges between the slaves and the masters.
+
+\subsubsection{Execution process}
+
+A simple example where we have only one framework that wants to run a 
+job formed by a single task will serve to explain all the steps that happen
+before a computation can take place in the cluster:
+
+\begin{enumerate}
+\item Master starts. One of the candidates is selected as the master and 
+the others remain as backup masters that will take the place of the current leader in
+case it fails. The leader will start listening to the registration of slaves and 
+frameworks.
+\item The slaves start. They find the current master through a distributed configuration 
+service and they register themselves by notifying the resources the put at the disposal
+of the cluster.
+\item The framework is launched. To execute its job the framework
+  first registers to the master and starts listening to resource
+  offers.
+\item Since our framework is alone in the cluster, the master makes an offer with
+all the resources available to our framework.
+\item The framework receives the offer and accepts it. It does so by responding to the
+offer with a list of the tasks that it wants to run specifying for every task: how to 
+execute the task and what resources will be dedicated to the execution.
+The response will only be valid if the resources assigned to all the tasks are a subset
+of the resources offered by the master.
+\item When the master receives the proposition to run the tasks. It
+  allocates the requested resources inside containers in the slaves
+  specified in the response and it launches the process to compute the
+  task. To be able to run the tasks the slave obviously needs to have
+  access to the binaries to run the process what is usually done
+  either making the binaries accessible to the whole cluster through a
+  distributed filesystem like the Google File System
+  \cite{ghemawat_google_2003} or Amazon's S3 \cite{_aws_????} or by
+  ensuring manually that the slaves have all the binaries in a public
+  accessible folder.
+\item Once the computation has finished the slave notifies the master that the resources
+are available again so the master can continue offering them to the frameworks.
+\end{enumerate}
+
+
+%% (add diagram over how mesos works?)
+
+Advantages:
+
+\begin{itemize}
+  \item
+  Really simple central scheduler (master in Mesos terms) that has
+  fail-over 
+ \item
+  Flexible: every framework decides how it schedules its tasks, the
+  master only offers resources following fairness 
+ \item
+  Through offer rejection, frameworks can achieve high data locality
+  only accepting offers that correspond to nodes where the data is
+  stored. To avoid waiting indefinitely a technique called delayed
+  scheduling \cite{zaharia_delay_2010} has proved to achieve high data locality without
+  sacrificing job execution time benefiting from the fact that tasks in
+  data processing frameworks like Hadoop or MPI are short so resources
+  are freed frequently.
+ \item Scalability
+ \item Specialized for jobs with high chunk and where schedulers don't take
+too long. With this kind of job, resources are freed frequently and
+every framework gets its fair share of the cluster.
+\end{itemize}
+
+Disadvantages:
+
+\begin{itemize}
+ \item This kind of scheduling encourages frameworks to demand more
+   resources than they actually need in preparation for everything
+   they want to run. If a framework wants to run a list of tasks in
+   many steps it will demand resources for the whole process even if
+   many resources will be idle during most steps.
+ \item Difficult to place picky jobs, for example to do gang scheduling
+frameworks in Mesos need to do resource hoarding what can lead to
+deadlocks
+ \item When a framework is offered some resources it
+holds the lock for the resource for the time the offer is
+available. If a framework hoards the resources or takes a long
+time to respond all other frameworks that are actually ready to accept
+the offer and execute their jobs will have to wait for the first
+framework to respond to the offer.
+
+For example in clusters that run service jobs or jobs with complex
+placement constraints that take long time to schedule the performance
+of two-level schedulers suffers.
+
+ \item Framework schedulers are written in an indirect style. They
+  take actions only when the resources are offered. 
+\end{itemize}
+
+
 
 
 
