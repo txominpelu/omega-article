@@ -26,6 +26,10 @@
 TODO
 \end{abstract}
 
+\section{Table of Contents}
+
+\tableofcontents
+
 \section{Introduction}
 
 Scheduling is planning the execution of a set of computations that
@@ -340,7 +344,68 @@ of two-level schedulers suffers.
 \end{itemize}
 
 
+\section{Different Scheduling Needs}
 
+Services
+Map/Reduce First Generation
+Map/Reduce New Generation (lower latency, higher scheduling needs but also higher
+chances for fairness..?)
+
+
+\section{Other responsabilities of the scheduler}
+
+Abstraction for the execution of tasks in multiple machines (e.g API)
+  - Run this in machine X
+  - Run this in machine X with X CPUs and Y GB Ram
+  - Communicate with my other task with id X (the cluster should figure out where the task is)
+  - Autorecover if task fails (if failure is due to the tasks retry n times, if it is due
+    to a machine find another machine for the task)
+
+
+\section{Omega Limitations}
+
+In its simplest version Omega was implemented without incremental resource allocation for 
+tasks and without fine grained resource management just like the first version implemented
+for Omega in [ref]. This version had limitations ... 
+
+But even with incremental resource allocation and fine grained resource management Omega
+has some limitations, specially as the cluster ``utilization'' grows and the possibility for 
+conflicts increases. When dealing with conflicts between tasks there are some factors to consider:
+
+ - (Task duration) If the tasks that conflict (or just the one that is running) take
+   minutes to finish, seconds or milliseconds
+ - If the tasks have different priority levels
+ - If the tasks are allowed to be preempted or not (if they have high availability 
+   requirements they can't *Note1*)
+   
+
+
+
+   
+*Note1* : Would it be useful if tasks could be associated an acceptable downtime threshold?
+*Note2* : When two services (higher priority) compete for overlapping resources what to do?
+ - The first one takes it and the other one doesn't get anything
+ - Sharing the cluster time (usually not satisfactory)
+ - Raise an alarm (unexpected situation - impossible to resolve appropriately)
+%% Can Omega be a general model that can be used to emulate other scheduling techniques (e.g
+%% Mesos, Sparrow..)
+ 
+When frameworks want to schedule tasks in the cluster they could either specify the required
+machines or allow to fallback to the given amount of resources without considering specific
+tasks. It's important that in the case where the cluster provides a fallback mechanism 
+this should be as simple as possible (for example just taking any other free machine).
+
+
+
+
+\subsection{Desired repartition properties}
+
+Read from  paper [Beyond Dominant Resource Fairness]
+
+- Incentivize sharing resources
+- Pareto efficient
+- Strategy-proof
+- Envy-free
 
 
 \section{Priorities}
