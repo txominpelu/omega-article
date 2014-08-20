@@ -53,53 +53,61 @@ different uses of cluster resources increases
 even more the importance of the process of scheduling as well of the
 complexity to handle all the different kinds of applications.
 
-%% why is scheduling important?
-%% - Big data centers
-%% - + recently generalized clusters
-%% - + amazon and other clouds
-%% - + popularity of parallel processing frameworks
-
 This relevance of the scheduling process constitutes a good
-incentivation for the scientific community to try to find the best
+''incentivation'' for the scientific community to try to find the best
 scheduling strategies to optimize the utilization of clusters. An
 incentivation that can be facilitated by the public release of the
 traces of the clusters of many big companies like [ref] that allow
 anyone interested in testing improvements to the existing scheduling
 models to try them against the real production traces of the clusters
 of the biggest companies.
-%% The public release of the traces of many clusters [refs] has
-%% make it possible for those interested to implement cluster
-%% schedulers and test them against the traces.
 
 %% Difficulties
 
-%% Explain quickly what are the difficulties for the implementation
-%% of schedulers (can take it from the abstract of the other article):
-
 Scheduling has a great impact in the well functioning of a cluster in
 terms of quality of service and running costs.  Unfortunately
-designing a cluster scheduler is a difficult task, mainly due to the
-diversity of scheduling strategies that the scheduler needs to support
-while remaining capable of taking quick scheduling decisions.
+designing a cluster scheduler is a difficult task. Many types
+of applications can run in a cluster, with completely different
+scheduling strategies that the scheduler needs to support while
+remaining simple a fast enough to deal with the increasing size of
+the clusters and the tighter scheduling deadlines imposed by recent
+data processing frameworks.
 
-%% Scheduling also consists in providing an abstraction layer for
-%% computations to execute their jobs in a distributed environment
-%% without having to manage the distribution of the computations
-%% or the binaries to execute them.
+Besides, the scheduler needs to able to deal with conflicts when many
+applications try to use the same resource at the same time and manage
+to offer every application a fair share of the resources of the cluster
+according to a list of defined criteria.
+
+Previous approaches to scheduling either have problems to deal with 
+having to run a diversity of applications, cannot scale when a cluster
+grows or don't achieve a high utilization of the resources. Two level 
+schedulers like Mesos \cite{Hindman10mesos:a} do provide scalability 
+and flexibility to run different applications but have some limitations when
+trying to achieve a good utilization of the resources of the cluster
+due to the pessimistic lock that is held with their offers and can reach
+deadlocks when two applications do resource hoarding. Omega \cite{41684}
+offers a more open model based on optimistic locking that avoids the 
+inconveniences of the two level model. However only the model behind Omega
+has been publicly exposed, so no available implementation exists that can
+be used to test Omega in different contexts. Besides, the Omega paper
+does not propose an explanation to achieve fairness in the context where
+frameworks compete for the same resource or how they avoid problems with
+``rogue'' frameworks apart from a basic notion of priority for the former 
+and post-facto monitoring for the latter.
 
 
-%% Succintly explain the main problems of the main approaches
-%% (forward reference) and the Omega alternative (forward reference)
+%% Be careful cause the simulator could be considered as such implementation
 
-%% Explain the limitations of Omega (for later)
-The good use of a cluster can be measured by considering if the
-quality constraints required by services are satisfied, the execution
-time of batch jobs and the percentage of cluster utilization. The
-quality of the scheduling algorithm used for a cluster affects all
-these metrics for that reason having a good scheduling algorithm has a big
-impact in the costs and the quality of the services provided.
+In section \nameref{approaches} I will describe the archetypical situation
+that a cluster scheduler faces in a datacenter and I will show how the
+existing approaches that have been proposed till the moment deal with it,
+showing their negative and their positive aspects.
 
-\section{Other approaches}
+
+
+
+\section{Existing approaches}
+\label{approaches}
 
 \subsection{Solutions for coordinated cluster scheduling}
 
@@ -481,6 +489,18 @@ How many of those examples cannot be resolved with priorities?
 
 
 \section{Experiments}
+
+\section{Scheduling as an abstraction layer for distribution?}
+%% Scheduling also consists in providing an abstraction layer for
+%% computations to execute their jobs in a distributed environment
+%% without having to manage the distribution of the computations
+%% or the binaries to execute them.
+
+%% Succintly explain the main problems of the main approaches
+%% (forward reference) and the Omega alternative (forward reference)
+
+%% Explain the limitations of Omega (for later)
+
 
 
 \section{Bibliography}
