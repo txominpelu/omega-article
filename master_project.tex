@@ -3,9 +3,13 @@
 \usepackage[utf8]{inputenc} %Codificacion utf-8
 \usepackage[autostyle]{csquotes}
 \usepackage[backend=biber]{biblatex}
+\usepackage{graphicx}
+
 
 \addbibresource{omega-article.bib}
 \addbibresource{other.bib}
+
+\graphicspath{ {./images/} }
 
 \begin{document}
 
@@ -98,16 +102,47 @@ and post-facto monitoring for the latter.
 
 %% Be careful cause the simulator could be considered as such implementation
 
-In section \nameref{approaches} I will describe the archetypical situation
+In section \ref{sec:approaches} I will describe the archetypical situation
 that a cluster scheduler faces in a datacenter and I will show how the
 existing approaches that have been proposed till the moment deal with it,
 showing their negative and their positive aspects.
 
+\section{Archetypical situation}
 
+Thanks to big companies like Google \ref, Yahoo \ref and Facebook \ref that
+have published the traces of their clusters, it is possible today to
+have an idea of the activity that happens today in a standard datacenter.
+In this section I'll define a characterization of this activity based on
+the published traces that I'll use in section \ref{sec:approaches} to 
+compare how the more relevant strategies that have been used historically
+to schedule jobs in a cluster behave in face of the situation described
+by the characterization.
+
+According to Google's traces, cluster's run mainly two group of jobs that
+are characterized by their duration. Most jobs last less than 30 minutes
+and are mainly MapReduce \ref jobs while a smaller amount of jobs last
+more than 18 hours and consume most of the cluster's resources. Yahoo's
+and Facebook's traces reveal the same aggregation of tasks between these
+clearly differentiated two groups.
+
+Qualitatively speaking the jobs from the first group are mainly parallel
+data processing jobs that belong to a myriad of frameworks that includes
+MapReduce frameworks like Hadoop, graph processing architectures like
+Giraph or Pregel, those specialized for incremental processing like Spark, 
+google's Dremel, and Percolator but also MPI jobs. An heterogenous group
+of frameworks that uses completely different strategies to scheduler their
+tasks. The jobs from the second group require usually high availability and
+have more difficult placement constraints what often means that their tasks
+take longer to be scheduled.
+
+The traces released by google and publicly accesible at \ref belong to
+cluster's with more than eleven thousand machines where rates arrive
+at a pace of \? per second, however this traces were released in 2011 so
+today's numbers have probably increased significantly.
 
 
 \section{Existing approaches}
-\label{approaches}
+\label{sec:approaches}
 
 \subsection{Solutions for coordinated cluster scheduling}
 
@@ -128,6 +163,13 @@ scheduler assigning resources. The central scheduler controls the
 state of the whole cluster, what makes it capable of taking really
 good scheduling decisions specially when all jobs have the same
 scheduling requirements. 
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[scale=0.25,natwidth=960,natheight=720]{CentralizedScheduler.png}
+  \caption{Centralized Scheduler}
+  \label{fig:centralized}
+\end{figure}
 
 However this design that is simple and capable of taking good
 decisions in the beginning, has many problems as the size of the
@@ -187,6 +229,13 @@ have an optimized dedicated scheduler for every kind while being
 relatively simple since every scheduler manages its portion of the
 cluster without any risk of conflicts with the others. It was
 for a while the model chosen by companies like Yahoo.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[scale=0.25,natwidth=960,natheight=720]{StaticPartitioning.png}
+  \caption{Static Partitioning}
+  \label{fig:static_partitioning}
+\end{figure}
 
 Nonetheless this strategy's drawback is that since the different 
 categories run in different, isolated portions of the cluster the
@@ -260,6 +309,15 @@ resources of the machine without interferences from other processes.
 An optimization to the model of resource offers is the possibility for the frameworks
 to define filters that describe the kinds of offers that a framework will not be interested
 in, this way avoiding unnecessary exchanges between the slaves and the masters.
+
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[scale=0.25,natwidth=960,natheight=720]{TwoLevel.png}
+  \caption{Two Level Scheduler}
+  \label{fig:two_level}
+\end{figure}
+
 
 \subsubsection{Execution process}
 
