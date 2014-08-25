@@ -137,7 +137,8 @@ take longer to be scheduled.
 
 The traces released by google and publicly accesible at \ref belong to
 cluster's with more than eleven thousand machines where rates arrive
-at a pace of \? per second, however this traces were released in 2011 so
+at a pace of %%FIXME%% 
+per second, however this traces were released in 2011 so
 today's numbers have probably increased significantly.
 
 
@@ -357,7 +358,6 @@ of the resources offered by the master.
 are available again so the master can continue offering them to the frameworks.
 \end{enumerate}
 
-
 %% (add diagram over how mesos works?)
 
 Advantages:
@@ -409,23 +409,61 @@ of two-level schedulers suffers.
   take actions only when the resources are offered. 
 \end{itemize}
 
+\subsubsection{Offer-all vs Fair-share offers}
 
-\section{Different Scheduling Needs}
+\subsection{Optimistic locking}
 
-Services
-Map/Reduce First Generation
-Map/Reduce New Generation (lower latency, higher scheduling needs but also higher
-chances for fairness..?)
+Another approach to cluster scheduling that tries to overcome some of
+the limitations of the pessimistic locking of two-level schedulers is
+the optimistic locking approach proposed by Google's Omega
+scheduler.
 
+The idea behind Omega is to make the state of the cluster available to
+every scheduler through a data structure that its called cell
+state. When one of the frameworks wants to run a job in the cluster it
+tries to commit a lock for the resources needed to run the job's
+tasks. If the resource has already been taken by another framework
+since the last update, the framework receives the updated version of
+the cluster and it can retry a commit of available resources. With
+this approach every scheduler has an overall view of the cluster what
+allows them to make better scheduling decisions while having a
+mediation mechanism when two frameworks want to commit for the same 
+resources.
 
-\section{Other responsabilities of the scheduler}
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[scale=0.25,natwidth=960,natheight=720]{Omega.png}
+  \caption{Omega Scheduler}
+  \label{fig:two_level}
+\end{figure}
 
-Abstraction for the execution of tasks in multiple machines (e.g API)
-  - Run this in machine X
-  - Run this in machine X with X CPUs and Y GB Ram
-  - Communicate with my other task with id X (the cluster should figure out where the task is)
-  - Autorecover if task fails (if failure is due to the tasks retry n times, if it is due
-    to a machine find another machine for the task)
+Since with this approach the state of the cluster is publicly exposed all the
+time for any framework to see, many of the problems that stem from the 
+pessimistic locking nature of two level schedulers are avoided.  Frameworks
+that take a long time to schedule are no longer a problem since they don't
+hold any lock over any resource while they're taking the decision. Besides,
+frameworks waiting for an offer no longer have to wait for their turn if they
+have a task ready to schedule, they can request the resources as soon as they
+know what resources they need and what tasks they will run on them. Frameworks
+that don't have any task to run at the moment don't make other frameworks wait
+and don't need to worry about responding negatively to offers, they can just
+focus on the core of their activity.
+
+Besides, the centralized model behind Omega is way simpler than the model based
+on offers used by Mesos. In its basic version, Omega represents just a thin 
+layer that manages conflict resolution for concurrent access to cluster's 
+resources. This simplicity makes it easy for the implementation of a scheduler 
+based on the Omega model to scale to bigger clusters or higher task interarrival 
+rates.
+
+However, the freedom that the Omega provides for frameworks to allocate resources
+in its basic version comes with a drawback when comparing it with the two level
+model. While in the two level model, the master manages what resources are
+offered to what framework, in its basic version Omega only accepts or rejects
+framework's demands based on wether the resources are available or not. 
+Therefore Omega have no way to enforce that the repartition of resources
+between frameworks is fair, or that higher priority tasks don't have to wait
+for lower priority tasks. 
 
 
 \section{Omega Limitations}
@@ -460,6 +498,33 @@ When frameworks want to schedule tasks in the cluster they could either specify 
 machines or allow to fallback to the given amount of resources without considering specific
 tasks. It's important that in the case where the cluster provides a fallback mechanism 
 this should be as simple as possible (for example just taking any other free machine).
+
+
+
+\section{Different Scheduling Needs}
+
+Services
+Map/Reduce First Generation
+Map/Reduce New Generation (lower latency, higher scheduling needs but also higher
+chances for fairness..?)
+
+
+\section{Other responsabilities of the scheduler}
+
+Abstraction for the execution of tasks in multiple machines (e.g API)
+  - Run this in machine X
+  - Run this in machine X with X CPUs and Y GB Ram
+  - Communicate with my other task with id X (the cluster should figure out where the task is)
+  - Autorecover if task fails (if failure is due to the tasks retry n times, if it is due
+    to a machine find another machine for the task)
+    
+This has allowed to implement on top of the scheduler / resource manager:
+
+  - Batch and stream based data processing frameworks (e.g Spark, Hadoop)
+  - Distributed webs with automatic loadbalancing (e.g Marathon + Play)
+  - Distributed disk based and memory based file systems (e.g hdfs & tachyon)
+  - Distributed build systems (jenkins)
+
 
 
 
