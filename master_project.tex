@@ -410,6 +410,26 @@ of two-level schedulers suffers.
 \end{itemize}
 
 
+\section{Fairness}
+
+Omega overcomes some of the limitations of the other
+scheduling strategies, however in it's basic version it doesn't
+provide any control mechanism to ensure that the repartition of
+resources between the frameworks is fair or to avoid misbehaving
+frameworks monopolizing the control of cluster's resources.
+
+Before we see how Omega can be modified to support a control mechanism
+to ensure fairness I will give a list of criteria that are used in
+microeconomics \ref to qualify repartition of resources as fair and that
+we will apply to our context of cluster's resources:
+
+\begin{itemize}
+  \item Pareto Optimality (PO)
+  \item Sharing Incentives 
+  \item Envy-Freeness
+  \item Strategyproofness
+\end{itemize}
+
 \section{Different Scheduling Needs}
 
 Services
