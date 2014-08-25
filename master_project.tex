@@ -468,12 +468,13 @@ for lower priority tasks.
 
 \section{Omega Limitations}
 
-In its simplest version Omega was implemented without incremental resource allocation for 
-tasks and without fine grained resource management just like the first version implemented
-for Omega in [ref]. This version had limitations ... 
+In its simplest version Omega was implemented without incremental resource 
+allocation for tasks and without fine grained resource management just like 
+the first version implemented for Omega in [ref]. This version had 
+limitations ... 
 
-But even with incremental resource allocation and fine grained resource management Omega
-has some limitations, specially as the cluster ``utilization'' grows and the possibility for 
+But even with incremental resource allocation and fine grained resource 
+management Omega has some limitations, specially as the cluster ``utilization'' grows and the possibility for 
 conflicts increases. When dealing with conflicts between tasks there are some factors to consider:
 
  - (Task duration) If the tasks that conflict (or just the one that is running) take
@@ -522,7 +523,7 @@ This has allowed to implement on top of the scheduler / resource manager:
 
   - Batch and stream based data processing frameworks (e.g Spark, Hadoop)
   - Distributed webs with automatic loadbalancing (e.g Marathon + Play)
-  - Distributed disk based and memory based file systems (e.g hdfs & tachyon)
+  - Distributed disk based and memory based file systems (e.g hdfs and tachyon)
   - Distributed build systems (jenkins)
 
 
