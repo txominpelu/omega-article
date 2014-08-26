@@ -411,7 +411,7 @@ of two-level schedulers suffers.
 
 \subsubsection{Offer-all vs Fair-share offers}
 
-\subsection{Optimistic locking}
+\section{Optimistic locking}
 
 Another approach to cluster scheduling that tries to overcome some of
 the limitations of the pessimistic locking of two-level schedulers is
@@ -449,24 +449,29 @@ that don't have any task to run at the moment don't make other frameworks wait
 and don't need to worry about responding negatively to offers, they can just
 focus on the core of their activity.
 
-Besides, the centralized model behind Omega is way simpler than the model based
-on offers used by Mesos. In its basic version, Omega represents just a thin 
-layer that manages conflict resolution for concurrent access to cluster's 
-resources. This simplicity makes it easy for the implementation of a scheduler 
-based on the Omega model to scale to bigger clusters or higher task interarrival 
-rates.
+Besides, the centralized model behind Omega is way simpler than the
+model based on offers used by Mesos. In its basic version, Omega
+represents just a thin layer that manages conflict resolution for
+concurrent access to cluster's resources. This simplicity makes it
+easy for the implementation of a scheduler based on the Omega model to
+scale to bigger clusters or higher task interarrival rates.
 
-However, the freedom that the Omega provides for frameworks to allocate resources
-in its basic version comes with a drawback when comparing it with the two level
-model. While in the two level model, the master manages what resources are
-offered to what framework, in its basic version Omega only accepts or rejects
-framework's demands based on wether the resources are available or not. 
-Therefore Omega have no way to enforce that the repartition of resources
-between frameworks is fair, or that higher priority tasks don't have to wait
-for lower priority tasks. 
+However, the freedom that the Omega provides for frameworks to
+allocate resources in its basic version comes with a drawback when
+comparing it with the two level model. While in the two level model,
+the master manages what resources are offered to what framework, in
+its basic version Omega only accepts or rejects framework's demands
+based on wether the resources are available or not.  Therefore Omega
+have no way to enforce that the repartition of resources between
+frameworks is fair, or that higher priority tasks don't have to wait
+for lower priority tasks.
 
+FIXME:
+- Higher visibility allows frameworks more flexibility when playing 
+games and thus to reach a more satisfactory equilibrium. Game theory?
+- Scheduling is bin packing - Write a remark about this?
 
-\section{Omega Limitations}
+\subsection{Omega Limitations}
 
 In its simplest version Omega was implemented without incremental
 resource allocation for tasks and without fine grained resource
@@ -479,14 +484,13 @@ cluster ``utilization'' grows and the possibility for conflicts
 increases. When dealing with conflicts between tasks there are some
 factors to consider:
 
- - (Task duration)If the tasks that conflict (or just the one that is
+ \begin{itemize}
+   \item (Task duration)If the tasks that conflict (or just the one that is
    running) take minutes to finish, seconds or milliseconds If the
- - tasks have different priority levels If the tasks are allowed to be
+  \item Tasks have different priority levels If the tasks are allowed to be
   preempted or not (if they have high availability requirements they
   can't *Note1*)
-   
-
-
+ \end{itemize}
 
    
 *Note1* : Would it be useful if tasks could be associated an acceptable downtime threshold?
@@ -503,61 +507,25 @@ tasks. It's important that in the case where the cluster provides a fallback mec
 this should be as simple as possible (for example just taking any other free machine).
 
 
+\subsection{Priorities}
 
-\section{Different Scheduling Needs}
-
-Services
-Map/Reduce First Generation
-Map/Reduce New Generation (lower latency, higher scheduling needs but also higher
-chances for fairness..?)
-
-
-\section{Other responsabilities of the scheduler}
-
-Abstraction for the execution of tasks in multiple machines (e.g API)
-  - Run this in machine X
-  - Run this in machine X with X CPUs and Y GB Ram
-  - Communicate with my other task with id X (the cluster should figure out where the task is)
-  - Autorecover if task fails (if failure is due to the tasks retry n times, if it is due
-    to a machine find another machine for the task)
-    
-This has allowed to implement on top of the scheduler / resource manager:
-
-  - Batch and stream based data processing frameworks (e.g Spark, Hadoop)
-  - Distributed webs with automatic loadbalancing (e.g Marathon + Play)
-  - Distributed disk based and memory based file systems (e.g hdfs and tachyon)
-  - Distributed build systems (jenkins)
-
-
-
-
-
-\subsection{Desired repartition properties}
-
-Read from  paper [Beyond Dominant Resource Fairness]
-
-- Incentivize sharing resources
-- Pareto efficient
-- Strategy-proof
-- Envy-free
-
-
-\section{Priorities}
-
-A really simple yet fairly powerful way to consider business needs when many frameworks
-want to use the same resources at the same time is assigning priorities. In the competition
-for resources, tasks with higher priorities will always win against lower priority tasks. In
-the case where lower priority taks have already their resources assigned preemption will be
-used to ensure that the order is respected and that low priority tasks don't slow down high
-priority tasks even if this causes some overhead for the duplicated effort that lower priority
+A really simple yet fairly powerful way to consider business needs
+when many frameworks want to use the same resources at the same time
+is assigning priorities. In the competition for resources, tasks with
+higher priorities will always win against lower priority tasks. In the
+case where lower priority taks have already their resources assigned
+preemption will be used to ensure that the order is respected and that
+low priority tasks don't slow down high priority tasks even if this
+causes some overhead for the duplicated effort that lower priority
 tasks need to do when they're preempted.
 
-In practice this works well because by assigning the higher priority to the services, 
-that provide the higher business value [ref], we can ensure their high availability since 
-no other job can preempt them, and give them exactly the resources they need. Assigning the 
-Lower priority levels to batch jobs works well because jobs are usually less important
-than services but specially because they're more flexible in the allocation of their tasks,
-and they deal well with preemption.
+In practice this works well because by assigning the higher priority
+to the services, that provide the higher business value [ref], we can
+ensure their high availability since no other job can preempt them,
+and give them exactly the resources they need. Assigning the Lower
+priority levels to batch jobs works well because jobs are usually less
+important than services but specially because they're more flexible in
+the allocation of their tasks, and they deal well with preemption.
 
 
 %% Idea:
@@ -594,6 +562,89 @@ and they deal well with preemption.
 %% 2. How Omega can be improved when two (or many) jobs want to work over the same data 
 %%    (e.g in case of conflicts when do they retry, how to optimize that?)
 
+\subsection{Fairness}
+
+Omega overcomes some of the limitations of the other
+scheduling strategies, however in it's basic version it doesn't
+provide any control mechanism to ensure that the repartition of
+resources between the frameworks is fair or to avoid misbehaving
+frameworks monopolizing the control of cluster's resources.
+
+This problem has already appeared in the context of cluster scheduling
+and the solution most generally accepted is Dominant Resource Fairness
+(DRF) \ref[] that has already been applied to the Mesos two level
+scheduler. DRF considers that users care about the number of tasks
+they're allocated. The number of tasks allocated for a framework
+depends itself on dominant resource that is the resource that
+relatively demands most from the cluster, said otherwise the resource
+that demands a higher proportion of the cluster for a type of
+task. The number of tasks allocated to a user depends on the dominant
+resource because it is the one that will be relatively allocated most
+of the cluster. DRF attemps therefore to give all users an equal
+amount of their dominant resources.
+
+To explain DRF I will use the model of a cluster as a simplified
+environment already used at \ref where there are $n$ users
+$u_{1},u_{2},...,u_{n}$ and the cluster is represented by a vector of
+resources $R_{1},R_{2}...,R_{m}$. Each user $i$ has a \emph{demand
+  vector} $D_{i}$, which describes its absolute per task consumption,
+e.g., $D_{2} = \langle 3, 2, 1 \rangle$ means that user $u_{2}$ tasks
+require 3 units of resource $R_{1}$, 2 units of resource $R_{2}$ and 1
+unit of resource $R_{3}$. A user is always given resources as
+multiples of its demand vector and allocation is denoted as $A =
+\langle a_{1},...,a_{n} \rangle$ what means that user $u_{i}$ gets to
+run $a_{i}$ tasks, dimensioned according to its demand vector
+$D_{i}$. To simplify, scheduling is considered over an infinite task
+demand (i.e. $d_{i} = \infty$).
+
+Formally in DRF each user $i$ has a \emph{dominant share} $x_{i}$ ,
+which is $i's$ share of its dominant resource, i.e. $x_{i} = max_{j}\{s_{i,j}\}$,
+where $s_{i,j}$ is user $i$'s fractional share of resource $j$, where
+$s_{i,j} = a_{i}D_{i,j}/r_{j}$.
+
+%% Before we see how Omega can be modified to support a control mechanism
+%% to ensure fairness I will give a list of criteria that are used in
+%% microeconomics \ref to qualify repartition of resources as fair and that
+%% we will apply to our context of cluster's resources:
+
+\begin{itemize}
+  \item Pareto Optimality (PO)
+  \item Sharing Incentives 
+  \item Envy-Freeness
+  \item Strategyproofness
+\end{itemize}
+
+\section{Different Scheduling Needs}
+
+Services
+Map/Reduce First Generation
+Map/Reduce New Generation (lower latency, higher scheduling needs but also higher
+chances for fairness..?)
+
+
+\section{Other responsabilities of the scheduler}
+
+Scheduling as an abstraction layer for distribution?
+
+Scheduling also consists in providing an abstraction layer for
+computations to execute their jobs in a distributed environment
+without having to manage the distribution of the computations
+or the binaries to execute them.
+
+Abstraction for the execution of tasks in multiple machines (e.g API)
+  - Run this in machine X
+  - Run this in machine X with X CPUs and Y GB Ram
+  - Communicate with my other task with id X (the cluster should figure out where the task is)
+  - Autorecover if task fails (if failure is due to the tasks retry n times, if it is due
+    to a machine find another machine for the task)
+    
+This has allowed to implement on top of the scheduler / resource manager:
+
+  - Batch and stream based data processing frameworks (e.g Spark, Hadoop)
+  - Distributed webs with automatic loadbalancing (e.g Marathon + Play)
+  - Distributed disk based and memory based file systems (e.g hdfs and tachyon)
+  - Distributed build systems (jenkins)
+
 \section{Experiments}
 Two-level schedulers have been proven to deal badly with long scheduling decision times and
 when resources are not freed frequently, providing a non-optimal utilization of the resources
@@ -613,20 +664,12 @@ Examples of situations where some global policies can improve the performance of
 
 How many of those examples cannot be resolved with priorities? 
 
+\section{Different Scheduling Needs}
 
-\section{Experiments}
-
-\section{Scheduling as an abstraction layer for distribution?}
-%% Scheduling also consists in providing an abstraction layer for
-%% computations to execute their jobs in a distributed environment
-%% without having to manage the distribution of the computations
-%% or the binaries to execute them.
-
-%% Succintly explain the main problems of the main approaches
-%% (forward reference) and the Omega alternative (forward reference)
-
-%% Explain the limitations of Omega (for later)
-
+Services
+Map/Reduce First Generation
+Map/Reduce New Generation (lower latency, higher scheduling needs but also higher
+chances for fairness..?)
 
 
 \section{Bibliography}
