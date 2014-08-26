@@ -583,6 +583,8 @@ resource because it is the one that will be relatively allocated most
 of the cluster. DRF attemps therefore to give all users an equal
 amount of their dominant resources.
 
+%% FIXME: This is almost taken exactly from a paper
+
 To explain DRF I will use the model of a cluster as a simplified
 environment already used at \ref where there are $n$ users
 $u_{1},u_{2},...,u_{n}$ and the cluster is represented by a vector of
@@ -602,17 +604,48 @@ which is $i's$ share of its dominant resource, i.e. $x_{i} = max_{j}\{s_{i,j}\}$
 where $s_{i,j}$ is user $i$'s fractional share of resource $j$, where
 $s_{i,j} = a_{i}D_{i,j}/r_{j}$.
 
-%% Before we see how Omega can be modified to support a control mechanism
-%% to ensure fairness I will give a list of criteria that are used in
-%% microeconomics \ref to qualify repartition of resources as fair and that
-%% we will apply to our context of cluster's resources:
+An repartition of resources is \emph{Pareto efficient} if it's impossible
+to find another repartition where at least one user has more tasks
+allocated and all the other users have at least the same tasks. In some 
+situations pareto efficienty is incompatible with equal dominant resource
+allocation between users, for example if a one user's dominant resource
+is not needed at all by the others like figure ~\ref{fig:nonpareto} shows. \\
 
-\begin{itemize}
-  \item Pareto Optimality (PO)
-  \item Sharing Incentives 
-  \item Envy-Freeness
-  \item Strategyproofness
-\end{itemize}
+\begin{figure}[!ht]
+\centering
+$R = \langle 10, 10 \rangle$ \\
+$D = \langle \langle 10, 10 \rangle, \langle 0, 1 \rangle, \langle 0, 1 \rangle \rangle$ \\
+\caption{Non pareto efficient equal dominant resource allocation}
+\label{fig:nonpareto}
+\end{figure}
+
+Then $A = \langle 5, 5, 5 \rangle$ would equalize dominant resource
+allocations but it would not be Pareto efficient. Therefore DRF is computed
+iteratively with the algorithm described by: \\
+
+\blockquote{Repeatedly allocate one task to the user with minimum dominant
+share, for whom there are enough resources to allocate another task.} \\
+
+The allocations obtained by this algorithm satisfy some of the more
+relevant criteria that are related to fairness: \\
+
+\begin{description}
+  \item[Pareto Optimality (PO)] Already described in the previous
+  section this criterium marks a repartition of resources where
+  no more tasks can be allocated to user preserving other users'
+  allocations.
+  \item[Sharing Incentives]  Users are at least as happy as they
+  would be under an equal split of the resources.
+  \item[Envy-Freeness] Users can't benefit from swaping their
+  allocated resources with other users.
+  \item[Strategyproofness] Users cannot gain by misreporting
+  their demands.
+\end{description}
+
+%%FIXME: Extend that
+Besides, DRF supports weighted fair sharing similarly to Lottery
+Scheduling. 
+
 
 \section{Different Scheduling Needs}
 
