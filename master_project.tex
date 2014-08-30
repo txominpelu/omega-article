@@ -655,28 +655,71 @@ Map/Reduce New Generation (lower latency, higher scheduling needs but also highe
 chances for fairness..?)
 
 
-\section{Other responsabilities of the scheduler}
-
-Scheduling as an abstraction layer for distribution?
+\section{Scheduler as the core of a Distributed Operative System}
 
 Scheduling also consists in providing an abstraction layer for
 computations to execute their jobs in a distributed environment
-without having to manage the distribution of the computations
-or the binaries to execute them.
+without having to manage the distribution of the
+computations. Actually as an application that manages the access to
+the cluster's resources is actually quite easy to start adding
+functionalities to a scheduler to make it the core of a primitive
+distributed operative system. If the scheduler is capable of providing
+a simple API, it is easy to add other applicative layers on top of
+it that can allow a relatively simple programming on top of a
+distributed environment.
 
-Abstraction for the execution of tasks in multiple machines (e.g API)
-  - Run this in machine X
-  - Run this in machine X with X CPUs and Y GB Ram
-  - Communicate with my other task with id X (the cluster should figure out where the task is)
-  - Autorecover if task fails (if failure is due to the tasks retry n times, if it is due
-    to a machine find another machine for the task)
+This movement from simple scheduler, to core of a distributed
+operative system has already started happening with Mesos whose simple
+API has simplified the creation of frameworks like Aurora \ref{} or
+Marathon \ref{} that provide useful primitives for the execution
+of applications like load balancing and interservice communication,
+or automatic failover recovery.
+
+The implementation of distributed filesystems can also be simplified
+thanks to a resource manager as shown by the distributed filesytem
+tachyon \ref{} that takes advantage of Mesos primitives and as a side
+effect application running with the resource manager can take
+advantage of this distributed filesystems to refer logically to
+files stored physically in different nodes of the cluster.
+
+Other example of framework that provides operative system primitives
+on top of Mesos is Chronos \ref{} that provides simple workflow
+management and high level job scheduling and represents a higher
+level, distributed alternative to cron.
+
+This primitives themselves greatly facilitate the implementation of
+distributed user facing services like distributed web applications
+with elastic execution, automatic load balancing and failover (e.g
+Marathon + play), distributed build systems (e.g. Jenkins) and of
+course the parallel data processing frameworks like Hadoop that were
+initially the motivating factor that drove the construction of the
+whole distributed environment.
+
+%%- Abstraction over distribution (Parallel processing, Communication
+%% interprocesses, Memory, FileSystem)
+%%- Failover
+%%- Load balancing
+%%- Job Isolation
+
+%% Abstraction for the execution of tasks in multiple machines (e.g API)
+%%   - Run this in machine X
+%%   - Run this in machine X with X CPUs and Y GB Ram
+%%   - Communicate with my other task with id X (the cluster should figure out where the task is)
+%%   - Autorecover if task fails (if failure is due to the tasks retry n times, if it is due
+%%     to a machine find another machine for the task)
     
-This has allowed to implement on top of the scheduler / resource manager:
+%%This has allowed to implement on top of the scheduler / resource manager:
+%%
+%%  - Batch and stream based data processing frameworks (e.g Spark, Hadoop)
+%%  - Distributed webs with automatic loadbalancing (e.g Marathon + Play)
+%%  - Distributed disk based and memory based file systems (e.g hdfs and tachyon)
+%%  - Distributed build systems (jenkins)
 
-  - Batch and stream based data processing frameworks (e.g Spark, Hadoop)
-  - Distributed webs with automatic loadbalancing (e.g Marathon + Play)
-  - Distributed disk based and memory based file systems (e.g hdfs and tachyon)
-  - Distributed build systems (jenkins)
+%% FIXME: Talk about job isolation
+
+%% FIXME: correct reference
+In section \ref{FIXME}  we'll describe how our implementation of Omega
+addresses some of this issues through the exposed API.
 
 \section{Experiments}
 Two-level schedulers have been proven to deal badly with long scheduling decision times and
