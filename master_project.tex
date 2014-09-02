@@ -645,10 +645,81 @@ relevant criteria that are related to fairness: \\
 %%FIXME: Extend that
 Besides, DRF supports weighted fair sharing similarly to Lottery
 Scheduling. 
+%%FIXME: How to extend DRF to deal with data locality
 
+\section {Isomorphism between Omega and two-level schedulers}
+
+Pesimistic and optimistic locking have both advantages and
+disadvantages, sometimes pesimistic locking of resources where
+resources are kept by a framework for the duration of an offer is
+simpler and more adequate since frameworks holding that kind of offer
+know that the resources belong to them and if they run tasks on them
+they know those tasks would run and they won't be preempted. We have
+already seen the advantages of optimistic locking in terms of
+efficiency. However for the moment we had seen optimistic and
+pesimistic locking as the two opposite sides of a coin and frameworks
+implementing allocations based on either one or the other. In this
+section we will see that both two level schedulers and Omega-like
+schedulers can provide some support for both kinds of locking.
+
+If we look at it from the point of view of the offers that two level
+schedulers like Mesos do, the difference between pessimistic locking
+and optimistic locking is that in the first offers for a resource are
+unique at a given point in time, only the framework that holds the
+offer for a resource can launch a task on it. That is why we say that
+this frameworks holds a lock on the resource and we say that the lock
+is pessimistic because the scheduler assumes that conflicts can happen
+at any time and avoids conflicts to happen by only making an offer for
+a resource at a time.
+
+On the other hand if a scheduler like Mesos changes its policies and
+starts offering all available resources to all frameworks all the time
+and takes care of resolving conflicts only when they happened it would
+pass from a pessimistic locking to an optimistic locking policy where
+it assumes that conflicts happen rarely and that when they happen it
+takes care of them.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[scale=0.25,natwidth=960,natheight=720]{MesosOptimisticLocking.png}
+  \caption{Optimistic Locking with two level scheduler}
+  \label{fig:centralized}
+\end{figure}
+
+The other way around is also possible if Omega doesn't listen to
+demands from all frameworks all the time. If instead it listens to only
+one framework at a time and partitions its time between all the
+frameworks registered in the cluster then every framework holds the
+lock for the available resources of the cluster for the time Omega is
+listening to it, working in a similar way a two level scheduler does
+when it follows the offer-all strategy.
+
+However both the simulation of optimistic locking with Mesos and the
+pessimistic locking with Omega are inefficient. Doing optimistic
+locking with Mesos means that all frameworks need to be notified
+constantly of all the available resources even if they don't need them
+because they don't have tasks to run on them. Pessimistic locking in
+Omega implies assigning and arbitrary time per framework that may not
+be adequate either demanding loads of negative responses from
+frameworks or making them wait when they need resources. The most positive
+side of being able to emulate one locking in a scheduler predominantly
+based on the other kind of locking is that this avoids having to
+choose, allowing mixing, assigning a kind a locking for a subset of
+the resources of the cluster and another kind for the rest of the
+resources when appropriate.
+
+
+
+%% FIXME: Talk about implementation of both in prototype
+
+%%   - How to do optimistic locking with a two level scheduler
+%%   - How to do pessimistic locking with Omega (time boxing)
+%%   - Mix optimistic and pessimistic locking in a cluster
+%%   - Advantages and limitations
 
 \section{Different Scheduling Needs}
 
+%% And which scheduling is more appropriate to which need
 Services
 Map/Reduce First Generation
 Map/Reduce New Generation (lower latency, higher scheduling needs but also higher
@@ -717,6 +788,54 @@ whole distributed environment.
 
 %% FIXME: Talk about job isolation
 
+\subsection{Isolation}
+
+As we have seen in the introduction todays cluster's are made to run a
+great variety of jobs belonging to frameworks that may have completely
+different objectives. All those frameworks need to work most of the
+time isolated from the rest, interferences between frameworks are
+exceptions that frameworks ask for explicitly. However it is
+impossible or deeply inefficient from the point of view of resource
+utilization to run every framework in a different machine to provide
+isolation. That means that a scheduler needs means to assign a subset
+of the resources of a machine to a job for the execution of its tasks
+and ensure that other processes running in the machine cannot
+interfere with the tasks running in the subset.
+
+This functionality can already be provided through virtual machines,
+but they impose a remarkable overcharge on the processes they run when
+compared with the same processes running outside of the virtual
+machine, that is the reason why containers where added to
+Linux. Containers were initially developed by engineers at Google
+under the name of control groups. Control groups are groups of
+processes bound by the same rules regarding: \\
+
+\begin{itemize}
+  \item Resource limiting
+  \item Priorization
+  \item Accounting
+  \item Control, checkpointing and restarting
+\end{itemize}
+
+Control groups work together with another feature of the Linux Kernel
+called namespace isolation, that allows to create hierarchies of
+groups of processes that cannot see the resources used by other
+groups.
+
+The initial advantage of using control groups and namespace isolation when
+compared with virtual machines is that processes work in an isolated
+environment without the overcharge of virtual machines. However, due
+to some of its features, control groups are the perfect ally of a
+scheduler when it comes to doing resource allocation since they provide
+a really fine granularity for controlling the use of resources such
+as CPU use, network bandwith, I/O throughput, memory and file system 
+cache they even provide accounting and the possibility of doing
+checkpointing and restarting a really useful feature when a scheduler
+needs to do preemption over jobs.
+
+%% FIXME: Reference to Schwarkpof's paper on why is now the time to
+%% build a distributed OS
+
 %% FIXME: correct reference
 In section \ref{FIXME}  we'll describe how our implementation of Omega
 addresses some of this issues through the exposed API.
@@ -753,5 +872,22 @@ chances for fairness..?)
 
 \printbibliography
 
+
+%% What does the project add?
+%% - Retrospective of all models of schedulers (pros/cons)
+%% - Implementation of mini Omega
+%%   - Solution to implementation problems
+%%     - When to do the updates of the cell state?
+%%     - How to avoid quickest always wins?
+%%     - Failover
+%%   - Adding priorities to Omega
+%%   - Adding DRF to Omega
+%%   - Allowing delayed scheduling with :flexible tag
+%% - Explained the isomorphism between two-level scheduler and Omega
+
+%% Future research directions
+%%  - Add data locality aware DRF
+%%  - Playing game between frameworks thanks to Omega's transparence
+%%  (be more concrete)
 
 \end{document}
