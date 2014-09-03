@@ -647,6 +647,53 @@ Besides, DRF supports weighted fair sharing similarly to Lottery
 Scheduling. 
 %%FIXME: How to extend DRF to deal with data locality
 
+\section {How to achieve locality with a Fairness-based allocation algorithm}
+
+As we've seen in the introduction, one of the reasons for the
+popularity of clusters is the popularization of distributed data
+processing frameworks like Hadoop or Google's MapReduce. One of the
+advantages of these frameworks is that they can work on big volumens
+of data by replicating the data and making accessible through a
+distributed filesystem. Then computations are executed in the nodes
+that holds the data, profitting from the fact that programs are much
+smaller than data, therefore it's quick to send the program where the
+data is stored. In summary, these frameworks profit from a property
+that is called data locality \ref[].
+
+When only one framework runs in the cluster it is easy to run every
+computation in the node that holds the data, specially since the data
+is replicated, so many nodes hold the same block of data. However as
+the number of frameworks running in the cluster increases it is more
+difficult for a scheduler to assign always the right node to every
+task. Besides, as many frameworks compete for the resources, schedulers
+start considering fairness as the most important criterium, to ensure
+that the different frameworks get their fair share of the cluster.
+
+The problem is that as we've seen with the example of DRF, fairness
+algorithms don't take into account data locality considerations. In
+general fairness algorithms work by offering the last available
+resource to the framework that controls the lower share of the cluster's
+resources, independently of the node the framework had asked for. This
+could lead to the conclusion that achieving fairness and data locality
+at the same time is difficult.
+
+Fortunately Zaharia et. al developed in their paper \ref[] a technique
+to avoid this problem called delay scheduling. Delay scheduling is a
+simple technique that proposes to wait a given timeout before offering
+a task resources from a node that doesn't contain the data the task
+will use. To avoid that frameworks wait indefinitively after the
+timeout a task will receive resources even if they don't come from the
+node the task wanted. If the timeout is well fixed, this techniques
+achieves good data locality without compromising fairness in
+environments where data is replicated across sufficient nodes and jobs
+don't last long, what is the case for most distributed processing
+frameworks. 
+
+\subsection {Implementing Delay Scheduling in Omega}
+
+%%
+
+
 \section {Isomorphism between Omega and two-level schedulers}
 
 Pesimistic and optimistic locking have both advantages and
@@ -889,5 +936,7 @@ chances for fairness..?)
 %%  - Add data locality aware DRF
 %%  - Playing game between frameworks thanks to Omega's transparence
 %%  (be more concrete)
+%%  - Replace DRF + Delay scheduling by a Fairness + Data locality
+%%  aware algorithm
 
 \end{document}
