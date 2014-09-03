@@ -5,76 +5,153 @@
 \date\today
 
 \begin{document}
-  \begin{frame}
-    \frametitle{Goals}
-    \begin{itemize} 
-     \item Execute Jobs within given constraints
-       \begin{itemize}
-         \item Two different kinds of jobs (services and batch jobs)
-         \item Types of job constraints
-         \begin{itemize}
-           \item Execution time
-           \item High availability
-           \item Failover
-           \item Data locality
-         \end{itemize}
-       \end{itemize}
-     \item (Secondary) Maximize cluster utilization
-    \end{itemize}
-    %Content goes here
-  \end{frame}
-  \begin{frame}
-    \frametitle{Difficulties}
-    \begin{itemize}
-      \item Scheduler needs to scale as the cluster grows
-      \item Scheduler needs to be highly available
-      \item Heterogenous mixed of jobs to execute 
-            (batch/services, hadoop vs MPI, ..)
-            \em (Different scheduling needs) 
-      \item New data processing frameworks demand subsecond scheduling times for 
-            their tasks
-      \item Ideally the scheduler needs to be simple
-    \end{itemize}
-    %More content goes here
-  \end{frame}
-  \begin{frame}
-    Existing scheduling solutions
-    \begin{itemize}
-      \item Centralized Scheduler
-      \item Static Partitioning
-      \item Two-level phase scheduler (Mesos, YARN)
-      \item Distributed optimisted locking scheduler (Omega)
-      \item Fully distributed scheduler (Sparrow) - Specialized for data processing
-            jobs
-    \end{itemize}
-  \end{frame}
-  \begin{frame}
-    \begin{itemize}
-      \item Centralized Scheduler
-      \begin{itemize}
-        \item Pros
-        \begin{itemize}
-          \item Control over the whole cluster
-          \item Can achieve good cluster utilization
-          \item Can be simple when there's only one framework running in the cluster
-        \end{itemize}
-      \end{itemize}
-      \begin{itemize}
-        \item Cons
-        \begin{itemize}
-          \item Single point of failure
-          \item Doesn't scale (bottleneck)
-          \item It becomes really complex with an environment where many kinds of 
-                jobs are executed
-          \item It doesn't scale well
-        \end{itemize}
-      \end{itemize}
-    \end{itemize}
 
+  \begin{frame}
+  \titlepage
   \end{frame}
+
+  \begin{frame}
+    \frametitle{Scheduling}
+    \begin{definition}{Scheduling:}
+    planning the execution of a set of computations that
+    are called jobs in an execution environment with a limited amount
+    of resources.
+    \end{definition}
+    \begin{itemize}
+      \item Why is it relevant?
+      \begin{itemize}
+        \item Growing datacenters for big companies (Google, Yahoo!,
+          Facebook, Amazon)
+        \item Small and Medium sized companies own more clusters (in
+          the cloud or physically)  
+        \item Increasing popularity of distributed processing
+      \end{itemize}
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Why is it difficult?}
+    \begin{itemize}
+      \item Increasing size of clusters
+      \item Growing number of jobs to run
+      \item Jobs are more sensitive to scheduling delays
+      \item Diversity of scheduling needs
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Different Approaches}
+    \begin{itemize}
+      \item Centralized Scheduler (single-path or multi-path)
+      \item Static partitioning
+      \item Two level Schedulers (i.e. Mesos)
+      \item Optimistic locking (i.e. Omega)
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Centralized Scheduler}
+    \begin{itemize}
+      \item[+] Initially simple
+      \item[+] Efficient policies with few frameworks
+      \item[-] Scalability problems: scheduler is a bottleneck
+      \item[-] Head of line blocking (even with multi-path)
+      \item[-] Can't deal with different scheduling needs
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Static partitioning}
+    \begin{itemize}
+      \item[+] Frameworks can schedule the way they want 
+      \item[+] No possibility of conflicts
+      \item[-] Really inefficient use of the cluster
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Two-Level Scheduler}
+    \begin{definition}
+      A central scheduler offers the available resources to
+      the frameworks that can accept them and launch tasks
+      with them.
+    \end{definition}
+    \begin{itemize}
+      \item Resources are dynamically allocated
+      \item Frameworks schedule tasks the way they want
+        with the resources they get
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Two-Level Scheduler - Pros and Cons}
+    \begin{itemize}
+      \item[+] Resources are no longer compartimented
+      \item[+] No possibility of conflicts
+      \item[-] 
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Contributions}
+    \begin{itemize}
+        \item Prototype implementations of Mesos and Omega
+        \item Study of Offer-all vs Fair share alternatives for Mesos
+        \item Simulation optimistic locking with Mesos (and the other way around)
+        \item Fairness and Data-locality proposition for Omega
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Prototype implementations}
+    \begin{itemize}
+        \item Omega's is first proposed implementation
+        \item Allow to:
+        \begin{itemize}
+          \item Study the two different models
+          \item Spot similarities - Propose common models (e.g
+            cross-model simulations)
+          \item Test features
+          \item Test performance
+          \item Test general solutions in the two models 
+        \end{itemize}
+        \item Simplifications
+          \begin{itemize}
+            \item Frameworks are really simple internal processes (no
+              different scheduling needs emulated)
+            \item Tasks aren't run distributedly (just in their own thread)
+            \item No high volumes of traces run against the prototypes
+          \end{itemize}
+    \end{itemize}
+  \end{frame}
+
+    \begin{frame}
+      \frametitle{Study of Offer-all vs Fair share alternatives}
+      \begin{itemize}
+      \end{itemize}
+    \end{frame}
+
+    \begin{frame}
+      \frametitle{Simulating optimistic locking with Mesos}
+      \begin{itemize}
+        \item How does it work?
+        \item Requirements
+        \item Advantages, Disadvantages
+        \item Interest of Mixed strategy
+      \end{itemize}
+    \end{frame}
+
+    \begin{frame}
+      \frametitle{Fairness and datalocality proposition for Omega}
+      \begin{itemize}
+        \item Fairness (quick explanation of DRF)
+        \item Limitations of DRF (and other fairness algorithms)
+        \item How to get both fairness and locality? Delay Scheduling
+        \item Delay scheduling implementation for Omega
+      \end{itemize}
+    \end{frame}
 
 \end{document}
-
 %Final Goals
 
 
@@ -113,6 +190,76 @@
 %    hadoop tasks can really affect the performance since there are thousands of task per job)
 %  - Scale when the cluster grows
 %  - Be simple (Ideally)
+
+
+
+%  \begin{frame}
+%    \frametitle{Goals}
+%    \begin{itemize} 
+%     \item Execute Jobs within given constraints
+%       \begin{itemize}
+%         \item Two different kinds of jobs (services and batch jobs)
+%         \item Types of job constraints
+%         \begin{itemize}
+%           \item Execution time
+%           \item High availability
+%           \item Failover
+%           \item Data locality
+%         \end{itemize}
+%       \end{itemize}
+%     \item (Secondary) Maximize cluster utilization
+%    \end{itemize}
+%    %Content goes here
+%  \end{frame}
+%  \begin{frame}
+%    \frametitle{Difficulties}
+%    \begin{itemize}
+%      \item Scheduler needs to scale as the cluster grows
+%      \item Scheduler needs to be highly available
+%      \item Heterogenous mixed of jobs to execute 
+%            (batch/services, hadoop vs MPI, ..)
+%            \em (Different scheduling needs) 
+%      \item New data processing frameworks demand subsecond scheduling times for 
+%            their tasks
+%      \item Ideally the scheduler needs to be simple
+%    \end{itemize}
+%    %More content goes here
+%  \end{frame}
+%  \begin{frame}
+%    Existing scheduling solutions
+%    \begin{itemize}
+%      \item Centralized Scheduler
+%%      \item Static Partitioning
+%      \item Two-level phase scheduler (Mesos, YARN)
+%      \item Distributed optimisted locking scheduler (Omega)
+%      \item Fully distributed scheduler (Sparrow) - Specialized for data processing
+%            jobs
+%%    \end{itemize}
+%  \end{frame}
+%  \begin{frame}
+%    \begin{itemize}
+%%      \item Centralized Scheduler
+%      \begin{itemize}
+%        \item Pros
+%%        \begin{itemize}
+%          \item Control over the whole cluster
+%%          \item Can achieve good cluster utilization
+%          \item Can be simple when there's only one framework running in the cluster
+%        \end{itemize}
+%%%      \end{itemize}
+%      \begin{itemize}
+%        \item Cons
+%%        \begin{itemize}
+%          \item Single point of failure
+%          \item Doesn't scale (bottleneck)
+%          \item It becomes really complex with an environment where many kinds of 
+%                jobs are executed
+%          \item It doesn't scale well
+%        \end{itemize}
+%      \end{itemize}
+%    \end{itemize}
+%
+%  \end{frame}
 
 
 
