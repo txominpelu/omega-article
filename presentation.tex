@@ -1,14 +1,20 @@
-\documentclass{beamer}
+\documentclass[notes]{beamer}
+\usepackage{graphicx}
 \usetheme{Warsaw}
 \title{Cluster Scheduling}
 \author{Inigo Mediavilla}
 \date\today
+\setbeamertemplate{note page}[plain]
+
+\graphicspath{ {./images/} }
 
 \begin{document}
 
   \begin{frame}
   \titlepage
   \end{frame}
+  
+  \note{}
 
   \begin{frame}
     \frametitle{Scheduling}
@@ -29,6 +35,8 @@
     \end{itemize}
   \end{frame}
 
+  \note{}
+
   \begin{frame}
     \frametitle{Why is it difficult?}
     \begin{itemize}
@@ -38,6 +46,8 @@
       \item Diversity of scheduling needs
     \end{itemize}
   \end{frame}
+
+  \note{}
 
   \begin{frame}
     \frametitle{Different Approaches}
@@ -49,25 +59,52 @@
     \end{itemize}
   \end{frame}
 
+  \note{}
+
   \begin{frame}
     \frametitle{Centralized Scheduler}
-    \begin{itemize}
-      \item[+] Initially simple
-      \item[+] Efficient policies with few frameworks
-      \item[-] Scalability problems: scheduler is a bottleneck
-      \item[-] Head of line blocking (even with multi-path)
-      \item[-] Can't deal with different scheduling needs
-    \end{itemize}
+    \begin{columns}[T]
+       \begin{column}{.5\textwidth}
+        \begin{block}{Advantages/Disadvantages}
+            \begin{itemize}
+              \item[+] Initially simple
+              \item[+] Efficient policies with few frameworks
+              \item[-] Scalability problems: scheduler is a bottleneck
+              \item[-] Head of line blocking (even with multi-path)
+              \item[-] Can't deal with different scheduling needs
+            \end{itemize}
+   % Your text here
+        \end{block}
+       \end{column}
+       \begin{column}{.6\textwidth}
+   % Your image included here
+         \includegraphics[trim = 0mm 0mm 50mm 0mm,clip,scale=0.20,natwidth=960,natheight=720]{CentralizedScheduler.png}
+       \end{column}
+     \end{columns}
   \end{frame}
+
+  \note{}
 
   \begin{frame}
     \frametitle{Static partitioning}
-    \begin{itemize}
-      \item[+] Frameworks can schedule the way they want 
-      \item[+] No possibility of conflicts
-      \item[-] Really inefficient use of the cluster
-    \end{itemize}
+       \begin{columns}[T]
+       \begin{column}{.5\textwidth}
+        \begin{block}{Advantages/Disadvantages}
+
+            \begin{itemize}
+              \item[+] Frameworks can schedule the way they want 
+              \item[+] No possibility of conflicts
+              \item[-] Really inefficient use of the cluster
+            \end{itemize}
+        \end{block}
+        \end{column}
+        \begin{column}{.6\textwidth}
+         \includegraphics[trim = 0mm 0mm 50mm 0mm,clip,scale=0.20,natwidth=960,natheight=720]{StaticPartitioning.png}
+        \end{column}
+      \end{columns}
   \end{frame}
+
+  \note{}
 
   \begin{frame}
     \frametitle{Two-Level Scheduler}
@@ -83,14 +120,61 @@
     \end{itemize}
   \end{frame}
 
+  \note{}
+
   \begin{frame}
     \frametitle{Two-Level Scheduler - Pros and Cons}
+       \begin{columns}[T]
+       \begin{column}{.5\textwidth}
+        \begin{block}{Process}
+           Frameworks receive offers for the available resources 
+           from the scheduler. 
+        \end{block}
+        \begin{block}{Advantages/Disadvantages}
+            \begin{itemize}
+              \item[+] Resources are no longer compartimented
+              \item[+] No possibility of conflicts
+              \item[-] Long frameworks slow down the cluster
+              \item[-] Two frameworks hoarding resources can provoke a deadlock
+            \end{itemize}
+        \end{block}
+        \end{column}
+        \begin{column}{.6\textwidth}
+         \includegraphics[trim = 0mm 0mm 10mm 0mm,clip,scale=0.18,natwidth=960,natheight=720]{TwoLevel.png}
+        \end{column}
+      \end{columns}
+  \end{frame}
+
+  \note{}
+
+  \begin{frame}
+    \frametitle{Omega Scheduler}
+    \begin{definition}
+      Every framework knows the state of the cluster that
+      is updated only by the scheduler. The scheduler's role
+      is just to mediate when conflict happens and share
+      the state of the cluster with the frameworks when updates
+      happen.
+    \end{definition}
+  \end{frame}
+
+  \note{}
+
+
+  \begin{frame}
+    \frametitle{Omega Scheduler - Advantages}
     \begin{itemize}
-      \item[+] Resources are no longer compartimented
-      \item[+] No possibility of conflicts
-      \item[-] 
+      \item[+] Frameworks don't hold locks
+      \item[+] Inactive frameworks don't interfere
+      \item[+] Slow scheduling frameworks don't block others
+      \item[+] Frameworks can dynamically adjust their effort when 
+            the cluster is not busy
+      \item[-] No implementation proposed
+      \item[-] No fairness mechanism (proposed priorities and post-facto monitoring)
     \end{itemize}
   \end{frame}
+
+  \note{}
 
   \begin{frame}
     \frametitle{Contributions}
@@ -101,6 +185,8 @@
         \item Fairness and Data-locality proposition for Omega
     \end{itemize}
   \end{frame}
+
+  \note{}
 
   \begin{frame}
     \frametitle{Prototype implementations}
@@ -125,31 +211,40 @@
     \end{itemize}
   \end{frame}
 
-    \begin{frame}
-      \frametitle{Study of Offer-all vs Fair share alternatives}
-      \begin{itemize}
-      \end{itemize}
-    \end{frame}
+  \note{}
 
-    \begin{frame}
-      \frametitle{Simulating optimistic locking with Mesos}
-      \begin{itemize}
-        \item How does it work?
-        \item Requirements
-        \item Advantages, Disadvantages
-        \item Interest of Mixed strategy
-      \end{itemize}
-    \end{frame}
+  \begin{frame}
+    \frametitle{Study of Offer-all vs Fair share alternatives}
+    \begin{itemize}
+      \item Nothing
+    \end{itemize}
+  \end{frame}
 
-    \begin{frame}
-      \frametitle{Fairness and datalocality proposition for Omega}
-      \begin{itemize}
-        \item Fairness (quick explanation of DRF)
-        \item Limitations of DRF (and other fairness algorithms)
-        \item How to get both fairness and locality? Delay Scheduling
-        \item Delay scheduling implementation for Omega
-      \end{itemize}
-    \end{frame}
+  \note{}
+
+  \begin{frame}
+    \frametitle{Simulating optimistic locking with Mesos}
+    \begin{itemize}
+      \item How does it work?
+      \item Requirements
+      \item Advantages, Disadvantages
+      \item Interest of Mixed strategy
+    \end{itemize}
+  \end{frame}
+
+  \note{}
+
+  \begin{frame}
+    \frametitle{Fairness and datalocality proposition for Omega}
+    \begin{itemize}
+      \item Fairness (quick explanation of DRF)
+      \item Limitations of DRF (and other fairness algorithms)
+      \item How to get both fairness and locality? Delay Scheduling
+      \item Delay scheduling implementation for Omega
+    \end{itemize}
+  \end{frame}
+
+  \note{}
 
 \end{document}
 %Final Goals
