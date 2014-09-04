@@ -887,6 +887,69 @@ needs to do preemption over jobs.
 In section \ref{FIXME}  we'll describe how our implementation of Omega
 addresses some of this issues through the exposed API.
 
+\section{Related work}
+
+This project focuses on cluster environments where different
+frameworks compete for resources. In this kind of environment the
+scheduler is in charge of dispatching resources quick enough
+so that the scheduler doesn't become a bottleneck and that every
+framework can control the way it schedules its tasks whily ensuring
+a good use of the cluster's resources. 
+
+The first two approaches to scheduling namely Centralized Scheduling
+and Static Partitioning had troubles ensuring those very first basic
+requirements. Centralized Scheduling has the problem that the central
+scheduler soon becomes a bottleneck and that frameworks don't have
+freedom to schedule freely. Static Partitioning doesn't ensure a good
+use of the resources of the cluster.
+
+Leaving aside those two models, the two level model represented by
+Mesos \ref and the optmistic approach embodied by Omega \ref are the
+two models that provide the basic requirements needed for the type of
+cluster that is of interest for this article and that represents a
+mayority of the clusters that are found in today's companies. In this
+section we will quickly have a look at those models' limitations and
+how we have tried to overcome some of them.
+
+As we've seen, the two level model proposes dynamic allocation based on
+unique offers that a central scheduler makes to the independent
+schedulers of the frameworks. However, this approach shows
+inefficiencies since unique offers slow down the allocation of
+resources, specially when there are many idle frameworks or some
+frameworks take a long time to schedule their tasks.
+
+Omega proposes a model to avoid the problems of the pessimistic
+locking of unique offers but it doesn't propose an implementation of
+the model. This project proposes a basic prototype implementation 
+of Omega and Mesos what gives an idea of the structure that an
+Omega-based scheduler can have, how frameworks could communicate with
+it and how it compares with a simplified implementation of Mesos.
+
+Besides Schwarzkopf et al. only talk about priorities as a way to
+ensure that frameworks with higher business impact get to run their jobs
+with a higher preference than less important frameworks and about post
+facto monitoring as a supervision technique to ensure that frameworks
+make a reasonable use of the cluster. However this is insufficient in
+most environments because usually frameworks tend to overdemand
+resources and because the basic model with priorities doesn't account
+for how to ensure that same priority jobs get similar shares of the
+resources of the cluster.
+
+In this project we have explained the way to ensure fairness between
+resources introduced by \ref and we have added an implementation of
+DRF to Omega, proving that our implementation of Omega can ensure
+fairness between same priority frameworks. 
+
+By introducing a fairness-based algorithm like DRF, frameworks lose
+the possibility to ensure that their jobs are ran in the slave that
+holds the data they're interested in. To avoid this problem our
+implementation of Omega uses a technique called delay scheduling \ref
+to allow tasks to wait a for the duration of a timeout before
+accepting offers from slaves that don't contain copies of the data
+that is relevant for them. This way applying the right timeout tasks
+achieve a good datalocality without compromising the fair allocation. 
+
+
 \section{Experiments}
 Two-level schedulers have been proven to deal badly with long scheduling decision times and
 when resources are not freed frequently, providing a non-optimal utilization of the resources
