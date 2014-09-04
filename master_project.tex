@@ -40,40 +40,119 @@ Scheduling is planning the execution of a set of computations that
 are called jobs in an execution environment with a limited amount of
 resources.
 
-If we consider the size of the clusters of the biggest companies
-in the web, their resource consumption and the economical value of the
-applications that run on them we can quickly realize of the
-economical, ecological and business impact of a good utilization of
-these clusters that depends significantly on the quality of
-the schedulers that allocate their resources.
+Fairly recently many factors have boosted a process of
+industrialization of the management of software clusters that has
+itself increased the relevance of schedulers. 
 
-Besides, with the advention of the cloud platforms the ``prestation'' of clusters
-has become a business in itself. Initially thought for hosting
-webservers, databases and distributed services virtual machines
-are finding other uses for their computational resources such as
-distributed parallel processing that increases the possibility
-of manipulate and make sense out of bigger amounts of data. This
-different uses of cluster resources increases
-even more the importance of the process of scheduling as well of the
-complexity to handle all the different kinds of applications.
+The popularity of cloud platforms that brings
+many companies to opt for not having their own servers, hosting their
+services in the datacenters provided usually by the big actors of the
+web is one of these factors. 
+
+Another is the burst in the volume of data that companies need to deal
+with. This burst has added a new use for clusters initially thought
+amongst other things for hosting webservers, databases and distributed
+services virtual machines that now can be used to do distributed
+parallel processing a discipline that increases the possibility of
+manipulating and make sense out of bigger amounts of data.
+
+All those factors added to the increase in the number of their users
+has forced the clusters of the big companies to grow almost
+exponentially. Bigger clusters mean more complexity, higher resource
+consumption and higher economical value of the applications that run
+on them. Considering all of that is ease to realise of the importance
+of the good utilization of these clusters that depends significantly
+on the quality of the schedulers that allocate their resources.
+
+
+\subsection{Scheduler as the core of a Distributed Operative System}
+
+Scheduling also consists in providing an abstraction layer for
+computations to execute their jobs in a distributed environment
+without having to manage the distribution of the
+computations. Actually as an application that manages the access to
+the cluster's resources is actually quite easy to start adding
+functionalities to a scheduler to make it the core of a primitive
+distributed operative system. If the scheduler is capable of providing
+a simple API, it is easy to add other applicative layers on top of
+it that can allow a relatively simple programming on top of a
+distributed environment.
+
+This movement from simple scheduler, to core of a distributed
+operative system has already started happening with Mesos whose simple
+API has simplified the creation of frameworks like Aurora \ref{} or
+Marathon \ref{} that provide useful primitives for the execution
+of applications like load balancing and interservice communication,
+or automatic failover recovery.
+
+The implementation of distributed filesystems can also be simplified
+thanks to a resource manager as shown by the distributed filesytem
+tachyon \ref{} that takes advantage of Mesos primitives and as a side
+effect application running with the resource manager can take
+advantage of this distributed filesystems to refer logically to
+files stored physically in different nodes of the cluster.
+
+Other example of framework that provides operative system primitives
+on top of Mesos is Chronos \ref{} that provides simple workflow
+management and high level job scheduling and represents a higher
+level, distributed alternative to cron.
+
+This primitives themselves greatly facilitate the implementation of
+distributed user facing services like distributed web applications
+with elastic execution, automatic load balancing and failover (e.g
+Marathon + play), distributed build systems (e.g. Jenkins) and of
+course the parallel data processing frameworks like Hadoop that were
+initially the motivating factor that drove the construction of the
+whole distributed environment.
+
+In addition to that this primitives conform the origin of the core of
+a distributed operative system a really attractive perspective as data
+and users grow quickly. The possibility of a distributed operative
+system where data is accessible everywhere in a cluster and services
+can run transparently across many nodes and can dynamically adapt
+their consumption to the demands of their users constitutes a really
+appealing perspective and another reason to consider the relevance of
+this schedulers that constitute the very core of the system.
+
+
+%%- Abstraction over distribution (Parallel processing, Communication
+%% interprocesses, Memory, FileSystem)
+%%- Failover
+%%- Load balancing
+%%- Job Isolation
+
+%% Abstraction for the execution of tasks in multiple machines (e.g API)
+%%   - Run this in machine X
+%%   - Run this in machine X with X CPUs and Y GB Ram
+%%   - Communicate with my other task with id X (the cluster should figure out where the task is)
+%%   - Autorecover if task fails (if failure is due to the tasks retry n times, if it is due
+%%     to a machine find another machine for the task)
+    
+%%This has allowed to implement on top of the scheduler / resource manager:
+%%
+%%  - Batch and stream based data processing frameworks (e.g Spark, Hadoop)
+%%  - Distributed webs with automatic loadbalancing (e.g Marathon + Play)
+%%  - Distributed disk based and memory based file systems (e.g hdfs and tachyon)
+%%  - Distributed build systems (jenkins)
+
+%% FIXME: Talk about job isolation
+
+\subsection{Scientific Interest}
 
 This relevance of the scheduling process constitutes a good
-''incentivation'' for the scientific community to try to find the best
+motivation for the scientific community to try to find the best
 scheduling strategies to optimize the utilization of clusters. An
 incentivation that can be facilitated by the public release of the
-traces of the clusters of many big companies like [ref] that allow
+cluster traces of many big companies like \ref .Those traces allow
 anyone interested in testing improvements to the existing scheduling
-models to try them against the real production traces of the clusters
-of the biggest companies.
-
-%% Difficulties
+models to do it using the information taken from the logs of real datacenters.
 
 Scheduling has a great impact in the well functioning of a cluster in
 terms of quality of service and running costs.  Unfortunately
 designing a cluster scheduler is a difficult task. Many types
 of applications can run in a cluster, with completely different
 scheduling strategies that the scheduler needs to support while
-remaining simple a fast enough to deal with the increasing size of
+remaining simple and fast enough to deal with the increasing size of
 the clusters and the tighter scheduling deadlines imposed by recent
 data processing frameworks.
 
@@ -96,9 +175,8 @@ has been publicly exposed, so no available implementation exists that can
 be used to test Omega in different contexts. Besides, the Omega paper
 does not propose an explanation to achieve fairness in the context where
 frameworks compete for the same resource or how they avoid problems with
-``rogue'' frameworks apart from a basic notion of priority for the former 
+\emph{rogue} frameworks apart from a basic notion of priority for the former 
 and post-facto monitoring for the latter.
-
 
 %% Be careful cause the simulator could be considered as such implementation
 
@@ -106,6 +184,14 @@ In section \ref{sec:approaches} I will describe the archetypical situation
 that a cluster scheduler faces in a datacenter and I will show how the
 existing approaches that have been proposed till the moment deal with it,
 showing their negative and their positive aspects.
+
+%% FIXME: Reference to Schwarkpof's paper on why is now the time to
+%% build a distributed OS
+
+%% FIXME: correct reference
+%In section \ref{FIXME}  we'll describe how our implementation of Omega
+%addresses some of this issues through the exposed API.
+
 
 \section{Archetypical situation}
 
@@ -142,10 +228,9 @@ per second, however this traces were released in 2011 so
 today's numbers have probably increased significantly.
 
 
-\section{Existing approaches}
+\section{Historical approaches}
 \label{sec:approaches}
 
-\subsection{Solutions for coordinated cluster scheduling}
 
 In the following section we will explain some of the existing models
 of cluster schedulers considering their advantages and disadvantages
@@ -262,7 +347,7 @@ if one of the frameworks is idle other framework cannot use those
 available resources since the repartition is done statically
 \end{itemize}
 
-\subsection{Two-Level scheduler}
+\section{Two-Level scheduler}
 
 Two level schedulers give applications, also called
 frameworks, the ability to schedule their tasks independently while
@@ -299,18 +384,64 @@ custom policies can also be implemented. However if this policies are
 too simple the central scheduler of Mesos can be extended with new
 policies.
 
-Fail-over on the master is provided with machines that run as backups of the master and
+\subsection{Features}
+
+Since its birth Mesos has experienced a remarkable evolution that have
+placed it closer than any other scheduler to providing the API of the
+core of the distributed operative system that we described in the
+introduction. Some of the features that have helped with this process
+are failover and isolation.
+
+Failover on the master is provided with machines that run as backups of the master and
 are capable to restore the master's state when it falls. Schedulers and slaves can find
 the new master to register to with centralized configuration services like Zookeeper \cite{_apache_????}.
 
-Partitioning of the resources of the cluster is provided thanks to Linux containers \cite{_linux_????}
-an isolation technique that allows to run processes in an allocated subset of the 
-resources of the machine without interferences from other processes. 
+As we have seen in the introduction todays cluster's are made to run a
+great variety of jobs belonging to frameworks that may have completely
+different objectives. All those frameworks need to work most of the
+time isolated from the rest, interferences between frameworks are
+exceptions that frameworks ask for explicitly. However it is
+impossible or deeply inefficient from the point of view of resource
+utilization to run every framework in a different machine to provide
+isolation. That means that a scheduler needs means to assign a subset
+of the resources of a machine to a job for the execution of its tasks
+and ensure that other processes running in the machine cannot
+interfere with the tasks running in the subset.
 
-An optimization to the model of resource offers is the possibility for the frameworks
-to define filters that describe the kinds of offers that a framework will not be interested
-in, this way avoiding unnecessary exchanges between the slaves and the masters.
+This functionality can already be provided through virtual machines,
+but they impose a remarkable overcharge on the processes they run when
+compared with the same processes running outside of the virtual
+machine, that is the reason why containers where added to
+Linux. Containers were initially developed by engineers at Google
+under the name of control groups. Control groups are groups of
+processes bound by the same rules regarding: \\
 
+\begin{itemize}
+  \item Resource limiting
+  \item Priorization
+  \item Accounting
+  \item Control, checkpointing and restarting
+\end{itemize}
+
+Control groups work together with another feature of the Linux Kernel
+called namespace isolation, that allows to create hierarchies of
+groups of processes that cannot see the resources used by other
+groups.
+
+The initial advantage of using control groups and namespace isolation when
+compared with virtual machines is that processes work in an isolated
+environment without the overcharge of virtual machines. However, due
+to some of its features, control groups are the perfect ally of a
+scheduler when it comes to doing resource allocation since they provide
+a really fine granularity for controlling the use of resources such
+as CPU use, network bandwith, I/O throughput, memory and file system 
+cache they even provide accounting and the possibility of doing
+checkpointing and restarting a really useful feature when a scheduler
+needs to do preemption over jobs.
+
+Mesos has taken advantage of the features available through linux containers
+\cite{_linux_????} to provide its fine grained resource sharing
+mechanism as well as isolation and preemption.
 
 \begin{figure}[!ht]
   \centering
@@ -320,7 +451,7 @@ in, this way avoiding unnecessary exchanges between the slaves and the masters.
 \end{figure}
 
 
-\subsubsection{Execution process}
+\subsection{Execution process}
 
 A simple example where we have only one framework that wants to run a 
 job formed by a single task will serve to explain all the steps that happen
@@ -647,7 +778,9 @@ Besides, DRF supports weighted fair sharing similarly to Lottery
 Scheduling. 
 %%FIXME: How to extend DRF to deal with data locality
 
-\section {How to achieve locality with a Fairness-based allocation algorithm}
+\section{Contributions}
+
+\subsection {How to achieve locality with a Fairness-based allocation algorithm}
 
 As we've seen in the introduction, one of the reasons for the
 popularity of clusters is the popularization of distributed data
@@ -689,12 +822,10 @@ environments where data is replicated across sufficient nodes and jobs
 don't last long, what is the case for most distributed processing
 frameworks. 
 
-\subsection {Implementing Delay Scheduling in Omega}
-
-%%
+%%\subsection {Implementing Delay Scheduling in Omega}
 
 
-\section {Isomorphism between Omega and two-level schedulers}
+\subsection {Isomorphism between Omega and two-level schedulers}
 
 Pesimistic and optimistic locking have both advantages and
 disadvantages, sometimes pesimistic locking of resources where
@@ -764,129 +895,6 @@ resources when appropriate.
 %%   - Mix optimistic and pessimistic locking in a cluster
 %%   - Advantages and limitations
 
-\section{Different Scheduling Needs}
-
-%% And which scheduling is more appropriate to which need
-Services
-Map/Reduce First Generation
-Map/Reduce New Generation (lower latency, higher scheduling needs but also higher
-chances for fairness..?)
-
-
-\section{Scheduler as the core of a Distributed Operative System}
-
-Scheduling also consists in providing an abstraction layer for
-computations to execute their jobs in a distributed environment
-without having to manage the distribution of the
-computations. Actually as an application that manages the access to
-the cluster's resources is actually quite easy to start adding
-functionalities to a scheduler to make it the core of a primitive
-distributed operative system. If the scheduler is capable of providing
-a simple API, it is easy to add other applicative layers on top of
-it that can allow a relatively simple programming on top of a
-distributed environment.
-
-This movement from simple scheduler, to core of a distributed
-operative system has already started happening with Mesos whose simple
-API has simplified the creation of frameworks like Aurora \ref{} or
-Marathon \ref{} that provide useful primitives for the execution
-of applications like load balancing and interservice communication,
-or automatic failover recovery.
-
-The implementation of distributed filesystems can also be simplified
-thanks to a resource manager as shown by the distributed filesytem
-tachyon \ref{} that takes advantage of Mesos primitives and as a side
-effect application running with the resource manager can take
-advantage of this distributed filesystems to refer logically to
-files stored physically in different nodes of the cluster.
-
-Other example of framework that provides operative system primitives
-on top of Mesos is Chronos \ref{} that provides simple workflow
-management and high level job scheduling and represents a higher
-level, distributed alternative to cron.
-
-This primitives themselves greatly facilitate the implementation of
-distributed user facing services like distributed web applications
-with elastic execution, automatic load balancing and failover (e.g
-Marathon + play), distributed build systems (e.g. Jenkins) and of
-course the parallel data processing frameworks like Hadoop that were
-initially the motivating factor that drove the construction of the
-whole distributed environment.
-
-%%- Abstraction over distribution (Parallel processing, Communication
-%% interprocesses, Memory, FileSystem)
-%%- Failover
-%%- Load balancing
-%%- Job Isolation
-
-%% Abstraction for the execution of tasks in multiple machines (e.g API)
-%%   - Run this in machine X
-%%   - Run this in machine X with X CPUs and Y GB Ram
-%%   - Communicate with my other task with id X (the cluster should figure out where the task is)
-%%   - Autorecover if task fails (if failure is due to the tasks retry n times, if it is due
-%%     to a machine find another machine for the task)
-    
-%%This has allowed to implement on top of the scheduler / resource manager:
-%%
-%%  - Batch and stream based data processing frameworks (e.g Spark, Hadoop)
-%%  - Distributed webs with automatic loadbalancing (e.g Marathon + Play)
-%%  - Distributed disk based and memory based file systems (e.g hdfs and tachyon)
-%%  - Distributed build systems (jenkins)
-
-%% FIXME: Talk about job isolation
-
-\subsection{Isolation}
-
-As we have seen in the introduction todays cluster's are made to run a
-great variety of jobs belonging to frameworks that may have completely
-different objectives. All those frameworks need to work most of the
-time isolated from the rest, interferences between frameworks are
-exceptions that frameworks ask for explicitly. However it is
-impossible or deeply inefficient from the point of view of resource
-utilization to run every framework in a different machine to provide
-isolation. That means that a scheduler needs means to assign a subset
-of the resources of a machine to a job for the execution of its tasks
-and ensure that other processes running in the machine cannot
-interfere with the tasks running in the subset.
-
-This functionality can already be provided through virtual machines,
-but they impose a remarkable overcharge on the processes they run when
-compared with the same processes running outside of the virtual
-machine, that is the reason why containers where added to
-Linux. Containers were initially developed by engineers at Google
-under the name of control groups. Control groups are groups of
-processes bound by the same rules regarding: \\
-
-\begin{itemize}
-  \item Resource limiting
-  \item Priorization
-  \item Accounting
-  \item Control, checkpointing and restarting
-\end{itemize}
-
-Control groups work together with another feature of the Linux Kernel
-called namespace isolation, that allows to create hierarchies of
-groups of processes that cannot see the resources used by other
-groups.
-
-The initial advantage of using control groups and namespace isolation when
-compared with virtual machines is that processes work in an isolated
-environment without the overcharge of virtual machines. However, due
-to some of its features, control groups are the perfect ally of a
-scheduler when it comes to doing resource allocation since they provide
-a really fine granularity for controlling the use of resources such
-as CPU use, network bandwith, I/O throughput, memory and file system 
-cache they even provide accounting and the possibility of doing
-checkpointing and restarting a really useful feature when a scheduler
-needs to do preemption over jobs.
-
-%% FIXME: Reference to Schwarkpof's paper on why is now the time to
-%% build a distributed OS
-
-%% FIXME: correct reference
-In section \ref{FIXME}  we'll describe how our implementation of Omega
-addresses some of this issues through the exposed API.
-
 \section{Related work}
 
 This project focuses on cluster environments where different
@@ -949,32 +957,26 @@ accepting offers from slaves that don't contain copies of the data
 that is relevant for them. This way applying the right timeout tasks
 achieve a good datalocality without compromising the fair allocation. 
 
+\section{Conclusions and further work}
 
-\section{Experiments}
-Two-level schedulers have been proven to deal badly with long scheduling decision times and
-when resources are not freed frequently, providing a non-optimal utilization of the resources
-of the cluster.
+%\section{Experiments}
+%Two-level schedulers have been proven to deal badly with long scheduling decision times and
+%when resources are not freed frequently, providing a non-optimal utilization of the resources
+%of the cluster.
 
-Omega doesn't have a clear policy to mediate between frameworks to provide coordination so 
-that the execution can be improved.
+%Omega doesn't have a clear policy to mediate between frameworks to provide coordination so 
+%that the execution can be improved.
 
-Examples of situations where some global policies can improve the performance of the cluster:
+%Examples of situations where some global policies can improve the performance of the cluster:
 
- - A job takes most of the resources but it won't finish soon while other jobs would finish
-   quickly but they are not given the opportunity to use the resources
- - A job that many other jobs depend on is ignored while other job whose execution is less
-   relevant is executed first
- - A job that can run dynamically adjusting it's size takes resources of other job that needs
-  a fixed amount
+% - A job takes most of the resources but it won't finish soon while other jobs would finish
+%   quickly but they are not given the opportunity to use the resources
+% - A job that many other jobs depend on is ignored while other job whose execution is less
+%   relevant is executed first
+%% - A job that can run dynamically adjusting it's size takes resources of other job that needs
+%  a fixed amount
 
-How many of those examples cannot be resolved with priorities? 
-
-\section{Different Scheduling Needs}
-
-Services
-Map/Reduce First Generation
-Map/Reduce New Generation (lower latency, higher scheduling needs but also higher
-chances for fairness..?)
+%How many of those examples cannot be resolved with priorities? 
 
 
 \section{Bibliography}
@@ -996,7 +998,6 @@ chances for fairness..?)
 %% - Explained the isomorphism between two-level scheduler and Omega
 
 %% Future research directions
-%%  - Add data locality aware DRF
 %%  - Playing game between frameworks thanks to Omega's transparence
 %%  (be more concrete)
 %%  - Replace DRF + Delay scheduling by a Fairness + Data locality
