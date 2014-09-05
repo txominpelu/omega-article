@@ -1,4 +1,4 @@
-\documentclass{svjour3}                     % onecolumn (standard format)
+\documentclass{report}                     % onecolumn (standard format)
 \usepackage[english, activeacute]{babel} %Definir idioma español
 \usepackage[utf8]{inputenc} %Codificacion utf-8
 \usepackage[autostyle]{csquotes}
@@ -6,6 +6,7 @@
 \usepackage{graphicx}
 \usepackage{minted}
 
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 
 \addbibresource{omega-article.bib}
 \addbibresource{other.bib}
@@ -14,28 +15,56 @@
 
 \begin{document}
 
-\title{ Improving dynamic allocation cluster schedulers }
+\title{ Improving dynamic allocation in cluster schedulers }
 
-%\titlerunning{Short form of title}        % if too long for running head
+\begin{titlepage}
+\begin{center}
 
-\author{ Inigo Mediavilla }
-\institute{ UPMC Master STL \at
-              \email{imediava@gmail.com}           %  \\
-}
+% Upper part of the page. The '~' is needed because \\
+% only works if a paragraph has started.
 
+\textsc{\LARGE UPMC Master STL}\\[1.5cm]
+
+\textsc{\Large Master M2 }\\[0.5cm]
+\textsc{\Large Internship Report }\\[0.5cm]
+
+% Title
+\HRule \\[0.4cm]
+{ \huge \bfseries Improving dynamic allocation in clusters schedulers  \\[0.4cm] }
+
+\HRule \\[1.5cm]
+
+% Author and supervisor
+\begin{minipage}{0.4\textwidth}
+\begin{flushleft} \large
+\emph{Author:}\\
+Inigo \textsc{Mediavilla}
+\end{flushleft}
+\end{minipage}
+\begin{minipage}{0.4\textwidth}
+\begin{flushright} \large
+\emph{Supervisors:} \\
+Jean-Luc \textsc{Canela}
+Emmanuel \textsc{Chailloux}
+\end{flushright}
+\end{minipage}
+
+\vfill
+
+% Bottom of the page
+{\large \today}
+
+\end{center}
+\end{titlepage}
 \date{\today}
 
-\maketitle
-
-\begin{abstract}
-TODO
-\end{abstract}
-
-\section{Table of Contents}
+%%\begin{abstract}
+%%TODO
+%%\end{abstract}
 
 \tableofcontents
 
-\section{Introduction}
+\chapter{Introduction}
 
 Scheduling is planning the execution of a set of computations that
 are called jobs in an execution environment with a limited amount of
@@ -61,12 +90,12 @@ All those factors added to the increase in the number of their users
 has forced the clusters of the big companies to grow really
 quickly. Bigger clusters mean more complexity, higher resource
 consumption and higher economical value of the applications that run
-on them. Considering all of that is ease to realise of the importance
+on them. Considering all of that is easy to realise of the importance
 of the good utilization of these clusters that depends significantly
 on the quality of the schedulers that allocate their resources.
 
 
-\subsection{Scheduler as the core of a Distributed Operative System}
+\section{Scheduler as the core of a Distributed Operative System}
 
 Scheduling also consists in providing an abstraction layer for
 computations to execute their jobs in a distributed environment
@@ -80,12 +109,12 @@ it that can allow a relatively simple programming on top of a
 distributed environment.
 
 This movement from simple scheduler, to being the core of a
-distributed operative system has already started happening with Mesos
-whose simple API has facilitated the creation of frameworks like
-Aurora \cite{_apache_????-1} or Marathon
-\cite{_mesosphere/marathon_????} that provide useful primitives for the
-execution of applications like load balancing, interservice
-communication, or automatic failover.
+distributed operative system has already started with Mesos whose
+simple API has facilitated the creation of frameworks like Aurora
+\cite{_apache_????-1} or Marathon \cite{_mesosphere/marathon_????}
+that provide useful primitives like load balancing, interservice
+communication, or automatic failover for the execution of distributed
+applications .
 
 The implementation of distributed filesystems can also be simplified
 thanks to a resource manager as shown by the distributed filesytem
@@ -94,7 +123,7 @@ of this is that an application running with the resource manager can
 take advantage of this distributed filesystems to refer logically to
 files stored physically in different nodes of the cluster what means
 that schedulers and distributed filesystems complement each other and
-represent a big part of our distributed operative system.
+represent a big part of a distributed operative system.
 
 Other example of framework that provides operative system primitives
 on top of Mesos is Chronos \cite{_chronos:_????} that provides simple
@@ -114,7 +143,7 @@ a distributed operative system a really attractive perspective as data
 and users grow quickly. The possibility of a distributed operative
 system where data is accessible everywhere in a cluster and services
 can run transparently across many nodes and can dynamically adapt
-their consumption to the demands of their users constitutes a really
+their consumption to the demands of their users is a really
 appealing perspective and another reason to consider the relevance of
 the schedulers that constitute the very core of the system.
 
@@ -139,7 +168,7 @@ the schedulers that constitute the very core of the system.
 %%  - Distributed disk based and memory based file systems (e.g hdfs and tachyon)
 %%  - Distributed build systems (jenkins)
 
-\subsection{Scientific Interest}
+\section{Scientific Interest}
 
 This relevance of the scheduling process constitutes a good motivation
 for the scientific community to put effort into trying to find the
@@ -157,7 +186,7 @@ in a cluster, with completely different scheduling strategies that the
 scheduler needs to support while remaining simple and fast enough to
 deal with the increasing size of the cluster and the tighter
 scheduling deadlines imposed by recent data processing frameworks.
-The scheduler also needs to able to deal with conflicts when many
+The scheduler also needs to be able to deal with conflicts when many
 applications try to use the same resource at the same time and manage
 to offer every application a fair share of the resources of the
 cluster according to a list of defined criteria. 
@@ -165,10 +194,10 @@ cluster according to a list of defined criteria.
 Scientifically speaking some of the problems that appear when doing
 scheduling are applicable to other fields like microeconomy where
 resources need to be shared between different populations. For example
-\ref , the algorithm that will be used in our implementation of Omega
-has had great implications in the studies that deal with how to share
-fairly multiple resources between different individuals in
-microeconomy.
+Dominant Resources Fairness (DRF) \cite{ghodsi2011dominant} , the
+algorithm that will be used in our implementation of Omega has had
+great implications in the studies that deal with how to share fairly
+multiple resources between different individuals in microeconomy.
 
 Previous approaches to scheduling either have problems to deal with
 having to run a diversity of applications, cannot scale when a cluster
@@ -183,7 +212,7 @@ optimistic locking that avoids some inconveniences of the two level
 model. However only the model behind Omega has been publicly exposed,
 so no available implementation exists that can be used to test Omega
 in different contexts. Besides, the Omega paper does not propose an
-explanation to how to taken into account bussiness relevance in the
+explanation to how to take into account bussiness relevance in the
 context where frameworks compete for the same resource or how to avoid
 problems with \emph{rogue} frameworks apart from a basic notion of
 priorities and post-facto monitoring.
@@ -224,14 +253,14 @@ opens the door to setup mixed worloads in two level schedulers.
 %addresses some of this issues through the exposed API.
 
 
-\section{Archetypal Cluster}
+\chapter{Archetypal Cluster}
 \label{sec:archetype}
 
 Thanks to big companies like Google, Yahoo and Facebook that
 have published the traces of their clusters, it is possible today to
-have an idea of the activity that happens today in a standard datacenter.
-In this section I'll define a characterization of this activity based on
-the published traces that I'll use in section \ref{sec:approaches} to 
+have an idea of the activity that happens in a standard datacenter.
+In this section we will define a characterization of this activity based on
+the published traces that we will use in section \ref{sec:approaches} to 
 compare how the more relevant strategies that have been used historically
 to schedule jobs in a cluster behave in face of the situation described
 by the characterization.
@@ -259,18 +288,16 @@ eleven thousand machines , however this traces were released in 2011
 so today's numbers have probably increased significantly.
 
 
-\section{Historical approaches}
+\chapter{Historical approaches}
 \label{sec:approaches}
 
 
 In the following section we will explain some of the existing models
 of cluster schedulers considering their advantages and disadvantages
 having into account the criteria introduced in the previous
-section. Finally we will introduce the model Omega \cite{41684}
-proposed by engineers at google that aims to overcome many of the
-limitations of the other approaches.
+section. 
 
-\subsubsection{Centralized scheduler}
+\section{Centralized scheduler}
 
 The first schedulers were designed following a monolithic architecture
 with a central scheduler taking care of distributing the execution
@@ -300,19 +327,18 @@ between the schedulers.
 
 Above all, for a centralized scheduler it is difficult to adapt
 adequately to the heterogeinity of jobs that is executed in today's
-clusters \cite{37201}. Trying to define different
-scheduling paths for the different types of workloads is difficult
-because it requires algorithms to identify the type of a job, and comes
-at the expense of the scheduler's complexity. Some schedulers try to
-support different policies by implement really complex algorithms
-involving different weighting factors that provide rough
-approximations of the objectives of every kind of workload. Others
-like google's run different scheduling logic for every kind of
-workload but it usually implies that users of the scheduler need to
-have a really good understanding of the internals of the scheduling
-algorithm to be able to optimize the execution of jobs. In both cases
-the solution implies an additional layer of complexity to an already
-difficult task.
+clusters \cite{37201}. Trying to define different scheduling paths for
+the different types of workloads is difficult because it requires
+algorithms to identify the type of a job, and comes at the expense of
+the scheduler's complexity. Some schedulers try to support different
+policies by implement really complex algorithms involving different
+weighting factors that provide rough approximations of the objectives
+of every kind of workload. Others like google's old scheduler run
+different scheduling logic for every kind of workload but it usually
+implies that users of the scheduler need to have a really good
+understanding of the internals of the scheduling algorithm to be able
+to optimize the execution of jobs. In both cases the solution implies
+an additional layer of complexity to an already difficult task.
 
 Besides this model requires modifying the code of the scheduler every
 time a new type of workload appears. 
@@ -335,7 +361,7 @@ Disadvantages:
   \item Complexity
 \end{itemize}
 
-\subsection{Static partitioning}
+\section{Static partitioning}
 
 To overcome the limitations that the previous model had when dealing
 with clusters where the are many kinds of jobs with different scheduling
@@ -378,7 +404,7 @@ if one of the frameworks is idle other framework cannot use those
 available resources since the repartition is done statically
 \end{itemize}
 
-\section{Two-Level scheduler}
+\chapter{Two-Level scheduler}
 
 \label{sec:mesos}
 
@@ -417,7 +443,7 @@ custom policies can also be implemented. However if this policies are
 too simple the central scheduler of Mesos can be extended with new
 policies.
 
-\subsection{Features}
+\section{Features}
 
 Since its birth Mesos has experienced a remarkable evolution that have
 placed it closer than any other scheduler to providing the API of the
@@ -484,7 +510,7 @@ mechanism as well as isolation and preemption.
 \end{figure}
 
 
-\subsection{Execution process}
+\section{Execution process}
 
 A simple example where we have only one framework that wants to run a 
 job formed by a single task will serve to explain all the steps that happen
@@ -573,7 +599,7 @@ of two-level schedulers suffers.
   take actions only when the resources are offered. 
 \end{itemize}
 
-\section{Optimistic locking}
+\chapter{Optimistic locking}
 
 \label{sec:omega}
 
@@ -620,7 +646,7 @@ concurrent access to cluster's resources. This simplicity makes it
 easy for the implementation of a scheduler based on the Omega model to
 scale to bigger clusters or higher task interarrival rates.
 
-\subsection{Omega Limitations}
+\section{Omega Limitations}
 
 In its simplest version Omega was implemented without incremental
 resource allocation for tasks.  The lack of incremental resource
@@ -645,7 +671,7 @@ have no way to enforce that the repartition of resources between
 frameworks is fair, or that higher priority tasks don't have to wait
 for lower priority tasks.
 
-\section{Omega implementation}
+\chapter{Prototype Implementations}
 \label{sec:implementation}
 
 The Omega paper proposed an interesting model to do cluster
@@ -663,7 +689,7 @@ the scheduling mechanism of Omega and compare it with the core of
 Mesos what will serve us to see the similarities and differences
 between both approaches.
 
-\subsection{Scheduling Domain}
+\section{Scheduling Domain}
 
 The main concepts behind the domain of scheduling are:
 
@@ -714,13 +740,14 @@ The main concepts behind the domain of scheduling are:
 
 \end{description}
 
-\subsection{Scheduling Core}
+\section{Scheduling Core}
 
 In this section we will present the core of the scheduling mechanism
 for our prototypes of Omega and Mesos, we will explain how they work
 and we will compare them to see the difference between the approaches
 of the two models.
 
+\subsection{Omega}
 
 \begin{figure}[!ht]
 \centering
@@ -768,6 +795,8 @@ task is not run and the cluster is not modified. In both cases the
 demand and its status are logged for notification and tracking
 purposes. 
 
+
+\subsection{Mesos}
 
 \begin{figure}[!ht]
 \centering
@@ -830,7 +859,10 @@ resources they take it updates the state of the cluster.
 \label{fig:mesos-offerToAll}
 \end{figure}
 
+\chapter{Contributions}
+
 \section{Ensuring business relevance priorization}
+
 \label{sec:businessrelevance}
 
 \subsection{Priorities}
@@ -972,7 +1004,7 @@ Scheduling.
 %%FIXME: How to extend DRF to deal with data locality
 
 \section {How to achieve locality with a Fairness-based allocation algorithm}
-\label{delayscheduling}
+\label{sec:delayscheduling}
 
 As we've seen in the introduction, one of the reasons for the
 popularity of clusters is the popularization of distributed data
@@ -1088,7 +1120,7 @@ resources when appropriate.
 %%   - Mix optimistic and pessimistic locking in a cluster
 %%   - Advantages and limitations
 
-\section{Related work}
+\chapter{Related work}
 
 This project focuses on cluster environments where different
 frameworks compete for resources. In this kind of environment the
@@ -1150,7 +1182,7 @@ accepting offers from slaves that don't contain copies of the data
 that is relevant for them. This way applying the right timeout tasks
 achieve a good datalocality without compromising the fair allocation. 
 
-\section{Conclusions and further work}
+\chapter{Conclusions and further work}
 
 %% Scheduling is important...
 
@@ -1200,7 +1232,7 @@ publicly released, this way been able to test in a near real
 environment the modifications that have been proposed in the project.
 
 
-%\section{Experiments}
+%\chapter{Experiments}
 %Two-level schedulers have been proven to deal badly with long scheduling decision times and
 %when resources are not freed frequently, providing a non-optimal utilization of the resources
 %of the cluster.
@@ -1218,9 +1250,6 @@ environment the modifications that have been proposed in the project.
 %  a fixed amount
 
 %How many of those examples cannot be resolved with priorities? 
-
-
-\section{Bibliography}
 
 
 \printbibliography
