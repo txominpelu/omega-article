@@ -1,0 +1,136 @@
+\documentclass{svjour3}                     % onecolumn (standard format)
+\usepackage[english, activeacute]{babel} %Definir idioma español
+\usepackage[utf8]{inputenc} %Codificacion utf-8
+\usepackage[autostyle]{csquotes}
+\usepackage[backend=biber]{biblatex}
+\usepackage{graphicx}
+
+
+\begin{document}
+
+\title{ Applying smart policies to dynamic resource managers }
+
+%\titlerunning{Short form of title}        % if too long for running head
+
+\author{ Inigo Mediavilla }
+\institute{ UPMC Master STL \at
+              \email{imediava@gmail.com}           %  \\
+}
+\date{\today}
+\maketitle
+
+Scheduling is planning the execution of a set of computations that are
+called jobs in an execution environment with a limited amount of
+resources.
+
+In the current context of todays' datacenters where clusters grow
+really quickly reaching thousands of machines, and the number of jobs
+increase at an even higher pace, schedulers need to be able to keep up with
+these trends. This is even more difficult as the type of jobs that run
+in the clusters diversifies and the scheduling constraints with it.
+
+Previous models for doing scheduling were not ready to deal with all
+these circumstances. The centralized model where all tasks are
+scheduled by a centralized monolithic scheduler is not flexible enough
+to adapt to different scheduling constraints and cannot keep up as the
+size of the cluster or the number of jobs increase
+significantly. Static partitioning allows frameworks to schedule
+independently but it doesn't use the resources of the cluster
+efficiently since resources that are not used in a partitioning cannot
+be used by another. Fortunately, recently two dynamic allocation
+models have been proposed that are more adapted to deal with the
+circumstances that are present in todays' clusters.
+
+The first to appear was the two level model represented by Mesos that
+is based on a centralized scheduler (called master according to Mesos'
+terminology) that has direct access to the state of the cluster and
+knows what resources are available. At a lower level the frameworks
+that want to run tasks in the cluster register to the master who will
+make offers for the resources available. Frameworks have the right to
+accept or refuse the offers they get. When they accept they just need
+to specify what tasks they want to run and what resources from what
+they have been offered they want to dedicate to the tasks. 
+
+The model behind mesos works well in general terms but it has some
+inefficiencies and it doesn't weel with some specific cases. For
+example the model is based on offering the available resources to one
+framework at a time, this means that if a framework doesn't reply
+quickly to the offer all the other frameworks have to wait. In the
+case where many frameworks have registered but only one of them is
+ready to launch a task if the proactive framework is unlucky he may
+need to wait for all other frameworks to reply negatively before it
+can receive its offer.
+
+To overcome some of this limitations engineers at Google developed a
+new model that they called Omega. Omega is a model that is based on
+making all the resources available visible to all
+frameworks. Frameworks make demands to the scheduler for resources
+when they want. Since frameworks are kept up to date on the state of
+the cluster they most of the time the make demands for resources that
+are free and their demands are accepted. However if two or more
+frameworks make a request for the same resource at the same time the
+central scheduler takes care of resolving the conflict and notifying
+the frameworks whose offers haven't been accepted. This strategy is
+based in what is called optimistic locking in opposition to the
+pessimistic locking carried out by Mesos.
+
+However, whereas Mesos is a mature opensourced project with many
+interesting features, Omega has only been proposed in the paper
+published by Schwarzkopf et al. and there is no mature implementation
+of the scheduler publicly available. Besides, the paper where Omega is
+described doesn't provide any information on the problem of how to
+ensure that frameworks competing for resources get their fair share of
+the cluster's resources, or how to solve the dilemma of how to provide
+fairness in allocations while preserving datalocality.
+
+This project will start with a description of the archetypal situation
+that a cluster scheduler faces in today's datacenters and with a brief
+comparation of how the historical approaches to cluster scheduling
+namely centralized scheduling and static partitioning deal with it,
+showing their positive and negative aspects. Then we will study in
+depth the two main approaches that have been published recently to
+deal with dynamic allocation of resources for competing frameworks
+showing their high level model, their features as well as their
+advantages and limitations.
+
+Finally the most innovative contributions of this project will be
+presented. First we will present a prototype implementation of both
+models that we'll be schematically explained . Then we will fill the
+gap left by the paper that describes Omega by explaining how to add
+two policies (priorities and DRF) to ensure the consideration of
+business relevance with optimistic locking. We will also describe how
+we have managed to achieve both datalocality and fairness with DRF
+thanks to delay scheduling. The last contribution will be a
+description of how to emulate optimistic locking with a two level
+scheduler, an interesting technique that opens the door to setup mixed
+worloads in two level schedulers.
+
+
+The interest of this project stems from the analysis that it
+mades of the most relevant scheduling strategies with an in depth look
+at the two more recent ones two level scheduling and Omega. This study
+is supported by an implementation of ... 
+
+
+
+
+
+%% La fiche de synthèse doit contenir les éléments suivants :
+
+%% 1- Contexte général du stage
+%% Contexte et bref état de l'art : travaux dans ce domaine
+
+%% 2- Problème étudié
+%% Présentation du problème. Importance de la question, enjeux. Travaux connexes.
+
+%% 3- Votre contribution
+%% Choix et solutions que vous proposez (pas de technique, seulement les idées et les grandes lignes !)
+
+%% 4- Analyse de votre travail
+%% Apport de votre travail, du point de vue théorique, expérimental. Qualités et limitations de votre solution.
+
+%% 5- Bilan et perspectives
+%% Intérêt de votre approche, apport de votre contribution au domaine; quelle est la suite à donner à votre travail.
+
+
+\end{document}
