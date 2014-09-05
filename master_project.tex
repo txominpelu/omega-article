@@ -70,7 +70,7 @@ on the quality of the schedulers that allocate their resources.
 Scheduling also consists in providing an abstraction layer for
 computations to execute their jobs in a distributed environment
 without having to manage the distribution of the
-computations. Actually as an application that manages the access to
+computations. As an application that manages the access to
 the cluster's resources is actually quite easy to start adding
 functionalities to a scheduler to make it the core of a primitive
 distributed operative system. If the scheduler is capable of providing
@@ -78,19 +78,21 @@ a simple API, it is easy to add other applicative layers on top of
 it that can allow a relatively simple programming on top of a
 distributed environment.
 
-This movement from simple scheduler, to core of a distributed
+This movement from simple scheduler, to being the core of a distributed
 operative system has already started happening with Mesos whose simple
-API has simplified the creation of frameworks like Aurora \ref{} or
+API has facilitated the creation of frameworks like Aurora \ref{} or
 Marathon \ref{} that provide useful primitives for the execution
-of applications like load balancing and interservice communication,
-or automatic failover recovery.
+of applications like load balancing, interservice communication,
+or automatic failover.
 
 The implementation of distributed filesystems can also be simplified
 thanks to a resource manager as shown by the distributed filesytem
-tachyon \ref{} that takes advantage of Mesos primitives and as a side
-effect application running with the resource manager can take
-advantage of this distributed filesystems to refer logically to
-files stored physically in different nodes of the cluster.
+tachyon \ref{} that takes advantage of Mesos primitives. A side effect
+of this is that an application running with the resource manager can
+take advantage of this distributed filesystems to refer logically to
+files stored physically in different nodes of the cluster what means
+that schedulers and distributed filesystems complement each other and
+represent a big part of our distributed operative system.
 
 Other example of framework that provides operative system primitives
 on top of Mesos is Chronos \ref{} that provides simple workflow
@@ -112,7 +114,7 @@ system where data is accessible everywhere in a cluster and services
 can run transparently across many nodes and can dynamically adapt
 their consumption to the demands of their users constitutes a really
 appealing perspective and another reason to consider the relevance of
-this schedulers that constitute the very core of the system.
+the schedulers that constitute the very core of the system.
 
 
 %%- Abstraction over distribution (Parallel processing, Communication
@@ -139,51 +141,82 @@ this schedulers that constitute the very core of the system.
 
 \subsection{Scientific Interest}
 
-This relevance of the scheduling process constitutes a good
-motivation for the scientific community to try to find the best
-scheduling strategies to optimize the utilization of clusters. An
-incentivation that can be facilitated by the public release of the
-cluster traces of many big companies like \ref .Those traces allow
-anyone interested in testing improvements to the existing scheduling
-models to do it using the information taken from the logs of real datacenters.
+This relevance of the scheduling process constitutes a good motivation
+for the scientific community to put effort into trying to find the
+best scheduling strategies to optimize the utilization of clusters,
+and effort that has been eased by the public release of the cluster
+traces of many big companies like \ref .Those traces allow anyone
+interested in testing improvements to the existing scheduling models
+to do it using the information taken from the logs of real
+datacenters.
 
-Scheduling has a great impact in the well functioning of a cluster in
-terms of quality of service and running costs.  Unfortunately
-designing a cluster scheduler is a difficult task. Many types
-of applications can run in a cluster, with completely different
-scheduling strategies that the scheduler needs to support while
-remaining simple and fast enough to deal with the increasing size of
-the clusters and the tighter scheduling deadlines imposed by recent
-data processing frameworks.
-
-Besides, the scheduler needs to able to deal with conflicts when many
+Besides scheduling represents a really interesting problem with many
+factors making it a difficult task. Many types of applications can run
+in a cluster, with completely different scheduling strategies that the
+scheduler needs to support while remaining simple and fast enough to
+deal with the increasing size of the cluster and the tighter
+scheduling deadlines imposed by recent data processing frameworks.
+The scheduler also needs to able to deal with conflicts when many
 applications try to use the same resource at the same time and manage
-to offer every application a fair share of the resources of the cluster
-according to a list of defined criteria.
+to offer every application a fair share of the resources of the
+cluster according to a list of defined criteria. 
 
-Previous approaches to scheduling either have problems to deal with 
+Scientifically speaking some of the problems that appear when doing
+scheduling are applicable to other fields like microeconomy where
+resources need to be shared between different populations. For example
+\ref , the algorithm that will be used in our implementation of Omega
+has had great implications in the studies that deal with how to share
+fairly multiple resources between different individuals in
+microeconomy.
+
+Previous approaches to scheduling either have problems to deal with
 having to run a diversity of applications, cannot scale when a cluster
-grows or don't achieve a high utilization of the resources. Two level 
-schedulers like Mesos \cite{Hindman10mesos:a} do provide scalability 
-and flexibility to run different applications but have some limitations when
-trying to achieve a good utilization of the resources of the cluster
-due to the pessimistic lock that is held with their offers and can reach
-deadlocks when two applications do resource hoarding. Omega \cite{41684}
-offers a more open model based on optimistic locking that avoids the 
-inconveniences of the two level model. However only the model behind Omega
-has been publicly exposed, so no available implementation exists that can
-be used to test Omega in different contexts. Besides, the Omega paper
-does not propose an explanation to achieve fairness in the context where
-frameworks compete for the same resource or how they avoid problems with
-\emph{rogue} frameworks apart from a basic notion of priority for the former 
-and post-facto monitoring for the latter.
+grows or don't achieve a high utilization of the resources. Two level
+schedulers like Mesos \cite{Hindman10mesos:a} do provide scalability
+and flexibility to run different applications but have some
+limitations when trying to achieve a good utilization of the resources
+of the cluster due to the pessimistic lock that is held with their
+offers and can reach deadlocks when two applications do resource
+hoarding. Omega \cite{41684} offers a more open model based on
+optimistic locking that avoids some inconveniences of the two level
+model. However only the model behind Omega has been publicly exposed,
+so no available implementation exists that can be used to test Omega
+in different contexts. Besides, the Omega paper does not propose an
+explanation to how to taken into account bussiness relevance in the
+context where frameworks compete for the same resource or how to avoid
+problems with \emph{rogue} frameworks apart from a basic notion of
+priorities and post-facto monitoring.
 
 %% Be careful cause the simulator could be considered as such implementation
 
-In section \ref{sec:approaches} I will describe the archetypical situation
-that a cluster scheduler faces in a datacenter and I will show how the
-existing approaches that have been proposed till the moment deal with it,
-showing their negative and their positive aspects.
+This project will start with a description of the archetypal situation
+that a cluster scheduler faces in today's datacenters in section
+\ref{sec:archetype} and with a brief comparation in section
+\ref{sec:approaches} of how the historical approaches to cluster
+scheduling namely centralized scheduling and static partitioning deal
+with it, showing their positive and negative aspects. Then we will
+study in depth the two main approaches that have been published
+recently to deal with dynamic allocation of resources for competing
+frameworks in sections \ref{sec:mesos} and \ref{sec:omega} showing
+their high level model, their features as well as their advantages and
+limitations. 
+
+Finally the most innovative contributions of this project will be
+presented. First we will present a prototype implementation of both
+models that we'll be schematically explained in section
+\ref{sec:implementation} and fully accessible in annex
+\ref{annex:implementation} and that will represent in the case of
+Omega the first publicly released implementation of the model. Then in
+section \ref{sec:businessrelevance} we will fill the gap left by the
+paper that describes Omega by explaining how to add two policies
+(priorities and DRF) to ensure the consideration of business relevance
+with optimistic locking, while section \ref{sec:delayscheduling} will
+describe how we have managed to achieve both datalocality and fairness
+with DRF thanks to delay scheduling \ref. The last contribution in
+sectio \ref{sec:mixed} will be a description of how to emulate
+optimistic locking with a two level scheduler, an interesting
+technique that opens the door to setup mixed worloads in two level
+schedulers.
 
 %% FIXME: Reference to Schwarkpof's paper on why is now the time to
 %% build a distributed OS
@@ -193,7 +226,8 @@ showing their negative and their positive aspects.
 %addresses some of this issues through the exposed API.
 
 
-\section{Archetypical situation}
+\section{Archetypal Cluster}
+\label{sec:archetype}
 
 Thanks to big companies like Google \ref, Yahoo \ref and Facebook \ref that
 have published the traces of their clusters, it is possible today to
@@ -348,6 +382,8 @@ available resources since the repartition is done statically
 \end{itemize}
 
 \section{Two-Level scheduler}
+
+\label{sec:mesos}
 
 Two level schedulers give applications, also called
 frameworks, the ability to schedule their tasks independently while
@@ -540,9 +576,9 @@ of two-level schedulers suffers.
   take actions only when the resources are offered. 
 \end{itemize}
 
-\subsubsection{Offer-all vs Fair-share offers}
-
 \section{Optimistic locking}
+
+\label{sec:omega}
 
 Another approach to cluster scheduling that tries to overcome some of
 the limitations of the pessimistic locking of two-level schedulers is
@@ -565,7 +601,7 @@ resources.
   \centering
   \includegraphics[scale=0.25,natwidth=960,natheight=720]{Omega.png}
   \caption{Omega Scheduler}
-  \label{fig:two_level}
+  \label{fig:omega}
 \end{figure}
 
 Since with this approach the state of the cluster is publicly exposed all the
@@ -597,11 +633,6 @@ have no way to enforce that the repartition of resources between
 frameworks is fair, or that higher priority tasks don't have to wait
 for lower priority tasks.
 
-FIXME:
-- Higher visibility allows frameworks more flexibility when playing 
-games and thus to reach a more satisfactory equilibrium. Game theory?
-- Scheduling is bin packing - Write a remark about this?
-
 \subsection{Omega Limitations}
 
 In its simplest version Omega was implemented without incremental
@@ -623,20 +654,19 @@ factors to consider:
   can't *Note1*)
  \end{itemize}
 
-   
-*Note1* : Would it be useful if tasks could be associated an acceptable downtime threshold?
-*Note2* : When two services (higher priority) compete for overlapping resources what to do?
- - The first one takes it and the other one doesn't get anything
- - Sharing the cluster time (usually not satisfactory)
- - Raise an alarm (unexpected situation - impossible to resolve appropriately)
-%% Can Omega be a general model that can be used to emulate other scheduling techniques (e.g
-%% Mesos, Sparrow..)
- 
 When frameworks want to schedule tasks in the cluster they could either specify the required
 machines or allow to fallback to the given amount of resources without considering specific
 tasks. It's important that in the case where the cluster provides a fallback mechanism 
 this should be as simple as possible (for example just taking any other free machine).
 
+
+\section{Omega implementation}
+\label{sec:implementation}
+
+
+
+\section{Ensuring business relevance priorization}
+\label{sec:businessrelevance}
 
 \subsection{Priorities}
 
@@ -714,8 +744,6 @@ resource because it is the one that will be relatively allocated most
 of the cluster. DRF attemps therefore to give all users an equal
 amount of their dominant resources.
 
-%% FIXME: This is almost taken exactly from a paper
-
 To explain DRF I will use the model of a cluster as a simplified
 environment already used at \ref where there are $n$ users
 $u_{1},u_{2},...,u_{n}$ and the cluster is represented by a vector of
@@ -778,9 +806,8 @@ Besides, DRF supports weighted fair sharing similarly to Lottery
 Scheduling. 
 %%FIXME: How to extend DRF to deal with data locality
 
-\section{Contributions}
-
-\subsection {How to achieve locality with a Fairness-based allocation algorithm}
+\section {How to achieve locality with a Fairness-based allocation algorithm}
+\label{delayscheduling}
 
 As we've seen in the introduction, one of the reasons for the
 popularity of clusters is the popularization of distributed data
@@ -825,7 +852,8 @@ frameworks.
 %%\subsection {Implementing Delay Scheduling in Omega}
 
 
-\subsection {Isomorphism between Omega and two-level schedulers}
+\section {Isomorphism between Omega and two-level schedulers}
+\label{sec:mixed}
 
 Pesimistic and optimistic locking have both advantages and
 disadvantages, sometimes pesimistic locking of resources where
@@ -1002,5 +1030,11 @@ achieve a good datalocality without compromising the fair allocation.
 %%  (be more concrete)
 %%  - Replace DRF + Delay scheduling by a Fairness + Data locality
 %%  aware algorithm
+
+
+%% FIXME:
+%% - Higher visibility allows frameworks more flexibility when playing 
+%% games and thus to reach a more satisfactory equilibrium. Game theory?
+%% - Scheduling is bin packing - Write a remark about this?
 
 \end{document}
