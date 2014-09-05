@@ -4,6 +4,7 @@
 \usepackage[autostyle]{csquotes}
 \usepackage[backend=biber]{biblatex}
 \usepackage{graphicx}
+\usepackage{minted}
 
 
 \addbibresource{omega-article.bib}
@@ -654,16 +655,198 @@ factors to consider:
   can't *Note1*)
  \end{itemize}
 
-When frameworks want to schedule tasks in the cluster they could either specify the required
-machines or allow to fallback to the given amount of resources without considering specific
-tasks. It's important that in the case where the cluster provides a fallback mechanism 
-this should be as simple as possible (for example just taking any other free machine).
+When frameworks want to schedule tasks in the cluster they could
+either specify the required machines or allow to fallback to the given
+amount of resources without considering specific tasks. It's important
+that in the case where the cluster provides a fallback mechanism this
+should be as simple as possible (for example just taking any other
+free machine).
 
 
 \section{Omega implementation}
 \label{sec:implementation}
 
+The paper \ref{} proposed an interesting model to do cluster
+scheduling based on optimistic locking that overcomed some of the
+limitations of pesimistic locking adopted by two level schedulers like
+Mesos. However this paper didn't bring the public release of an
+implementation of a scheduler following the premises of the
+model. 
 
+This section will present a prototype implementation of a simplified
+scheduler based on the Omega model. We will start by describing the
+domain model of cluster scheduling that is shared both by our
+implementations of Mesos and Omega. Then we will describe the core of
+the scheduling mechanism of Omega and compare it with the core of
+Mesos what will serve us to see the similarities and differences
+between both approaches.
+
+\subsection{Scheduling Domain}
+
+The main concepts behind the domain of scheduling are:
+
+\begin{description}
+  \item[Cluster] \hfill \\
+  Represents all the available resources available for the frameworks
+  to run computations in the environment. This datatype contains the
+  resources that are currently avalaible and that can be used to
+  schedule tasks, the frameworks that are currently registered as well
+  as a list of channels that are used by frameworks to make demands of
+  resources for tasks, register or unregister themselves for the
+  cluster and notify of finished tasks and therefore released resources.
+  \item[Framework] \hfill \\
+  Represents an application that will execute computations
+  distributedly. It encapsulates a list of tasks that the application
+  wants to run with the resources the tasks need and takes care of
+  talking with the scheduler to tell him about the tasks it wants to
+  run or accepting or refusing offers in the case of Mesos.
+  \item[Resources]
+  Resources are just a representation of the computational power that
+  a cluster offers to run tasks. Our implementation contains only the
+  number of CPUs and memory units but other schedulers offer control
+  over the I/O or the network bandwith. \\
+
+  An initial implementation of the scheduler represented the resources
+  of the cluster as a whole, without specifying what slaves the
+  resources belonged to. However this implementation didn't account
+  for the tasks' needs to run in a specific node due to the need of
+  datalocality. The last implementation called full omega considers
+  resources belonging to the slaves and not to the whole cluster this
+  way taking into account datalocality.
+  
+  An interesting property of this datatype is that as resources are
+  freed and liberated by tasks resources need to be added and
+  substracted what defines an arithmetic of resources where the
+  addition represents a monoid.
+  \item[Task] \hfill \\
+  Is a computation that a framework needs to execute to fulfil its
+  objectives. Depending on the implementation the task may be
+  responsible of notifying the scheduler when it finishes and its
+  resources can be freed.
+  \item[Demand] \hfill \\
+  A demand represents a task to execute and the resources that are
+  needed to execute it. In addition to that, a demand  carry the
+  name of the framework that created it what is useful when the
+  scheduler needs to apply ordering to demands that is based on the
+  framework that made them.
+
+\end{description}
+
+\subsection{Scheduling Core}
+
+In this section we will present the core of the scheduling mechanism
+for our prototypes of Omega and Mesos, we will explain how they work
+and we will compare them to see the difference between the approaches
+of the two models.
+
+
+\begin{figure}[!ht]
+\centering
+\begin{minted}[mathescape,
+               linenos,
+               numbersep=5pt,
+               gobble=2,
+               frame=lines,
+               framesep=2mm]{clojure}
+    (defn omegaIter
+      [sorting]
+      (fn [cluster]
+        (let [finishedCh (cluster/getFinishedCh cluster)
+            demandsCh  (cluster/getDemandsCh cluster)
+            events  (channel/readAll [finishedCh demandsCh])
+            demands (channel/belongingTo events demandsCh)
+            finishedTasks (channel/belongingTo events finishedCh)
+            finishedRes (map task/getResources finishedTasks)
+            resourcesFreed (reduce resources/plusResources finishedRes)
+            cluster (cluster/addResources cluster resourcesFreed) ]
+            (reduce cluster/tryCommitDemand {:cluster cluster :logs []} 
+                                               (sorting cluster demands)))))
+
+\end{minted}
+\caption{Core of the Omega Scheduling algorithm}
+\label{fig:omega-implementation}
+\end{figure}
+
+As we can see in figure \ref{fig:omega-implementation} the core of the
+scheduling algorithm for Omega is a really simple piece of code that
+listens to all finished tasks and to all demands from the
+frameworks. It uses the notifications of finished tasks to update the 
+list of available resources from the cluster. Then it sorts the
+demands with a sorting algorithm that is passed to the function, what
+allows to plug the desired sorting algorithm. In most tests, the
+default sorting algorithm is a FIFO but thanks to this parameter the
+tests that verify that the fairness algorithm works properly only need
+to modify the sorting parameter to take the DRF algorithm.
+
+The function \emph{tryCommitDemand} only takes a demand and verifies
+if the resources requested by the demand are available, if they do it
+substracts the resources from the cluster and runs the task returning
+the new state of the cluster. If the resources are not available the
+task is not run and the cluster is not modified. In both cases the
+demand and its status are logged for notification and tracking
+purposes. 
+
+
+\begin{figure}[!ht]
+\centering
+\begin{minted}[mathescape,
+               linenos,
+               numbersep=5pt,
+               gobble=2,
+               frame=lines,
+               framesep=2mm]{clojure}
+    (defn offerResources
+      [cluster]
+      (let [registerCh (cluster/getRegisterCh cluster) 
+            finishedCh (cluster/getFinishedCh cluster) 
+            frameworks (cluster/getFrameworks cluster)
+            resources  (cluster/getResources cluster)
+            events     (channel/readAll [finishedCh registerCh])
+            finished   (channel/belongingTo events finishedCh)
+            registered (channel/belongingTo events registerCh)
+            resources (updateResources resources finished)
+            frameworks (framework/updateFrameworks frameworks registered [])
+            ]
+        (reduce offerToAll (cluster/withResources cluster resources) frameworks)))
+
+\end{minted}
+\caption{Core of the Mesos Scheduling algorithm}
+\label{fig:mesos-implementation}
+\end{figure}
+
+As we can see in figure \ref{fig:mesos-implementation} things don't
+change much with respect to the omega implementation. The most
+important change is that Mesos doesn't deal with demands directly,
+instead it makes offers to frameworks that accept them or refuse them
+based on the demands they have. The offers are made in the \emph{offerToAll}
+method that offers resources to the frameworks one by one and it
+receives the responses with the numbers of tasks to run a the
+resources they take it updates the state of the cluster.
+
+\begin{figure}[!ht]
+\centering
+\begin{minted}[mathescape,
+               linenos,
+               numbersep=5pt,
+               gobble=2,
+               frame=lines,
+               framesep=2mm]{clojure}
+    (defn offerToAll
+      [cluster fr]
+      (let [{demands :tasks newFr :framework}
+                  (framework/offeredResources (cluster/getResources cluster) fr)
+            resources (map task/getResources demands)
+            resourcesTaken (reduce resources/plusResources resources)
+            newCluster (cluster/substractResources cluster resourcesTaken)
+            newFrameworks (conj (cluster/getFrameworks newCluster) newFr)]
+            (doall (for [d demands] ((task/getTask d))))
+            (cluster/withFrameworks newCluster (set newFrameworks))))
+
+\end{minted}
+
+\caption{OfferToAll method}
+\label{fig:mesos-offerToAll}
+\end{figure}
 
 \section{Ensuring business relevance priorization}
 \label{sec:businessrelevance}
