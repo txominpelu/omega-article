@@ -347,18 +347,18 @@ Advantages:
 
 \begin{itemize}
   \item Control over the whole cluster. The scheduler is capable of taking good scheduling decisions.
-  \item Good cluster utilization
-  \item Simplest solution when there's only one framework running in the cluster
+  \item Good cluster utilization.
+  \item Simplest solution when there's only one framework running in the cluster.
 \end{itemize}
 
 Disadvantages:
 
 \begin{itemize}
-  \item Single point of failure
+  \item Single point of failure.
   \item Doesn't scale. The central scheduler is a bottleneck and
     slower jobs block other jobs that are faster to schedule.
-  \item Can't adapt to new frameworks with new policies and needs
-  \item Complexity
+  \item Can't adapt to new frameworks with new policies and needs.
+  \item Complexity.
 \end{itemize}
 
 \section{Static partitioning}
@@ -382,26 +382,26 @@ for a while the model chosen by companies like Yahoo.
 
 Nonetheless this strategy's drawback is that since the different 
 categories run in different, isolated portions of the cluster the
-resources of the cluster are wasted since it is not possible for
+resources of the cluster are wasted because it is not possible for
 a partition to use the resources that another partition is not using.
 
 Advantages:
 
 \begin{itemize}
-    \item Simple
-    \item Every framework can use their specific scheduler that is specialized
+    \item Simple.
+    \item Every framework can use their specific scheduler that is specialized.
     \item There's no possibility of conflicts between frameworks when
-      accessing the resources
+      accessing the resources.
 \end{itemize}
 
 Disadvantages:
 
 \begin{itemize}
   \item Difficult to decide what is the right partition of the resources
-between frameworks
+between frameworks.
   \item Non-optimal utilization of the resources of the cluster, for example
 if one of the frameworks is idle other framework cannot use those
-available resources since the repartition is done statically
+available resources since the repartition is done statically.
 \end{itemize}
 
 \chapter{Two-Level scheduler}
@@ -420,18 +420,21 @@ The resources of the cluster are provided by the slaves that register to
 the master at startup providing information about the amount of memory, CPU
 and network bandwidth  that they put at master's disposal.  
 
-Frameworks can satisfy their needs (for example data locality \cite{chung_maximizing_2006} ) by 
-rejecting the offers that don't interest them and accepting those who do, thus
-ensuring per framework needs despite a centralized resource manager. 
+Frameworks can satisfy their needs (for example data locality
+\cite{chung_maximizing_2006} ) by rejecting the offers that don't
+interest them and accepting those who do, thus ensuring per framework
+needs despite a centralized resource manager.
 
 When the interests of two frameworks conflict, for example two
-frameworks want to run their jobs in the same slave because they both
-access the same data, there are techniques to ensure that all
-frameworks can have their fair share of the resources they need. In
-the case of data processing jobs where tasks don't take long to
-execute a technique called delay scheduling \cite{zaharia_delay_2010}
-manages to provide good data locality for the tasks without delaying
-the execution of the whole job. Nonetheless, when two competing
+frameworks want to run their jobs in the same slave, there are
+techniques to ensure that all frameworks can have their fair share of
+the resources they need. Even though fairness allocation is sometimes
+in contradiction with some other interesting properties as we will see
+in section \ref{sec:delayscheduling} there are techniques to ensure that allocations
+have desired properties like data locality without abandoning fairness
+based algorithms. 
+
+Nonetheless, a limitation of Mesos is that when two competing
 frameworks use resource hoarding to incrementally acquire resources
 before they start a job deadlocks can emerge.
 
@@ -455,6 +458,8 @@ Failover on the master is provided with machines that run as backups of the mast
 are capable to restore the master's state when it falls. Schedulers and slaves can find
 the new master to register to with centralized configuration services like Zookeeper \cite{_apache_????}.
 
+\subsection{Isolation}
+
 As we have seen in the introduction todays cluster's are made to run a
 great variety of jobs belonging to frameworks that may have completely
 different objectives. All those frameworks need to work most of the
@@ -476,10 +481,10 @@ under the name of control groups. Control groups are groups of
 processes bound by the same rules regarding: \\
 
 \begin{itemize}
-  \item Resource limiting
-  \item Priorization
-  \item Accounting
-  \item Control, checkpointing and restarting
+  \item Resource limiting.
+  \item Priorization.
+  \item Accounting.
+  \item Control, checkpointing and restarting.
 \end{itemize}
 
 Control groups work together with another feature of the Linux Kernel
@@ -516,7 +521,7 @@ A simple example where we have only one framework that wants to run a
 job formed by a single task will serve to explain all the steps that happen
 before a computation can take place in the cluster:
 
-\begin{enumerate}
+\begin{itemize}
 \item Master starts. One of the candidates is selected as the master and 
 the others remain as backup masters that will take the place of the current leader in
 case it fails. The leader will start listening to the registration of slaves and 
@@ -546,7 +551,7 @@ of the resources offered by the master.
   accessible folder.
 \item Once the computation has finished the slave notifies the master that the resources
 are available again so the master can continue offering them to the frameworks.
-\end{enumerate}
+\end{itemize}
 
 %% (add diagram over how mesos works?)
 
@@ -555,10 +560,10 @@ Advantages:
 \begin{itemize}
   \item
   Really simple central scheduler (master in Mesos terms) that has
-  fail-over 
+  fail-over.
  \item
   Flexible: every framework decides how it schedules its tasks, the
-  master only offers resources following fairness 
+  master only offers resources following fairness.
  \item
   Through offer rejection, frameworks can achieve high data locality
   only accepting offers that correspond to nodes where the data is
@@ -567,7 +572,7 @@ Advantages:
   sacrificing job execution time benefiting from the fact that tasks in
   data processing frameworks like Hadoop or MPI are short so resources
   are freed frequently.
- \item Scalability
+ \item Scalability.
  \item Specialized for jobs with high chunk and where schedulers don't take
 too long. With this kind of job, resources are freed frequently and
 every framework gets its fair share of the cluster.
@@ -579,11 +584,11 @@ Disadvantages:
  \item This kind of scheduling encourages frameworks to demand more
    resources than they actually need in preparation for everything
    they want to run. If a framework wants to run a list of tasks in
-   many steps it will demand resources for the whole process even if
-   many resources will be idle during most steps.
+   many steps it will tend to demand more resources than it needs even if
+   some resources will be idle during some steps.
  \item Difficult to place picky jobs, for example to do gang scheduling
 frameworks in Mesos need to do resource hoarding what can lead to
-deadlocks
+deadlocks.
  \item When a framework is offered some resources it
 holds the lock for the resource for the time the offer is
 available. If a framework hoards the resources or takes a long
@@ -596,7 +601,7 @@ placement constraints that take long time to schedule the performance
 of two-level schedulers suffers.
 
  \item Framework schedulers are written in an indirect style. They
-  take actions only when the resources are offered. 
+  take actions only when the resources are offered.
 \end{itemize}
 
 \chapter{Optimistic locking}
@@ -648,13 +653,14 @@ scale to bigger clusters or higher task interarrival rates.
 
 \section{Omega Limitations}
 
-In its simplest version Omega was implemented without incremental
-resource allocation for tasks.  The lack of incremental resource
-allocation meant that a group of tasks for a job were only accepted
-either all or none, with just one conflict cancelling a whole
-transaction. This really inefficient model was replaced by one where
-tasks are treated independently and conflicts only affect tasks that
-are really involved in a competition for a resource.
+In its simplest version Omega was defined without incremental
+resource allocation and fine grained resource management for tasks.
+The lack of incremental resource allocation meant that a group of
+tasks for a job were only accepted either all or none, with just one
+conflict cancelling a whole transaction. This really inefficient model
+was replaced by one where tasks are treated independently and
+conflicts only affect tasks that are really involved in a competition
+for a resource.
 
 But even with incremental resource allocation and fine grained
 resource management Omega has some limitations, specially as the
@@ -708,7 +714,7 @@ The main concepts behind the domain of scheduling are:
   wants to run with the resources the tasks need and takes care of
   talking with the scheduler to tell him about the tasks it wants to
   run or accepting or refusing offers in the case of Mesos.
-  \item[Resources]
+  \item[Resources] \hfill \\
   Resources are just a representation of the computational power that
   a cluster offers to run tasks. Our implementation contains only the
   number of CPUs and memory units but other schedulers offer control
@@ -825,14 +831,15 @@ purposes.
 \label{fig:mesos-implementation}
 \end{figure}
 
-As we can see in figure \ref{fig:mesos-implementation} things don't
-change much with respect to the omega implementation. The most
-important change is that Mesos doesn't deal with demands directly,
-instead it makes offers to frameworks that accept them or refuse them
-based on the demands they have. The offers are made in the \emph{offerToAll}
-method that offers resources to the frameworks one by one and it
-receives the responses with the numbers of tasks to run a the
-resources they take it updates the state of the cluster.
+As we can see in figure \ref{fig:mesos-implementation} in the Mesos
+implementation things don't change much with respect to the omega
+implementation. The most important change is that Mesos doesn't deal
+with demands directly, instead it makes offers to frameworks that
+accept them or refuse them based on the demands they have. The offers
+are made in the \emph{offerToAll} method that offers resources to the
+frameworks one by one and it receives the responses with the numbers
+of tasks to run a the resources they take it updates the state of the
+cluster.
 
 \begin{figure}[!ht]
 \centering
@@ -863,6 +870,13 @@ resources they take it updates the state of the cluster.
 
 \section{Ensuring business relevance priorization}
 
+In this section we will explain two techniques to ensure that business
+relevance is taken into account by Omega. This tries to fill a gap
+that was left by the Omega paper when describing how to prioritize the
+execution of jobs. If we look at our implementation of Omega applying
+this techniques just consist on defining a sorting function and
+passing it as a parameter to the call to \emph{omegaIter}.
+
 \label{sec:businessrelevance}
 
 \subsection{Priorities}
@@ -885,6 +899,9 @@ priority levels to batch jobs works well because jobs are usually less
 important than services but specially because they're more flexible in
 the allocation of their tasks, and they deal well with preemption.
 
+Implementing this policy just needs that the sorting function keeps a
+register of the priorities associated to every framework and that
+those priorities are considered when doing the sorting.
 
 %% Idea:
 
@@ -930,12 +947,12 @@ frameworks monopolizing the control of cluster's resources.
 
 This problem has already appeared in the context of cluster scheduling
 and the solution most generally accepted is Dominant Resource Fairness
-(DRF) \cite{ghodsi2011dominant} that has already been applied to the
-Mesos two level scheduler. DRF considers that users care about the
-number of tasks they're allocated. The number of tasks allocated for a
-framework depends itself on dominant resource that is the resource
-that relatively demands most from the cluster, said otherwise the
-resource that demands a higher proportion of the cluster for a type of
+(DRF) that has already been applied to the Mesos two level
+scheduler. DRF considers that users care about the number of tasks
+they're allocated. The number of tasks allocated for a framework
+depends itself on dominant resource that is the resource that
+relatively demands most from the cluster, said otherwise the resource
+that demands a higher proportion of the cluster for a type of
 task. The number of tasks allocated to a user depends on the dominant
 resource because it is the one that will be relatively allocated most
 of the cluster. DRF attemps therefore to give all users an equal
@@ -977,7 +994,7 @@ $D = \langle \langle 10, 10 \rangle, \langle 0, 1 \rangle, \langle 0, 1 \rangle 
 
 Then $A = \langle 5, 5, 5 \rangle$ would equalize dominant resource
 allocations but it would not be Pareto efficient. Therefore DRF is computed
-iteratively with the algorithm described by: \\
+iteratively with the algorithm described by Ghodsi et al. with: \\
 
 \blockquote{Repeatedly allocate one task to the user with minimum dominant
 share, for whom there are enough resources to allocate another task.} \\
@@ -1003,6 +1020,45 @@ Besides, DRF supports weighted fair sharing similarly to Lottery
 Scheduling. 
 %%FIXME: How to extend DRF to deal with data locality
 
+The implementation of this policy in our implementation of Omega
+corresponds to the following piece of code:
+
+
+\begin{figure}[!ht]
+\centering
+\begin{minted}[mathescape,
+               linenos,
+               numbersep=5pt,
+               gobble=2,
+               frame=lines,
+               framesep=2mm]{clojure}
+    (defn internalDrf
+      [totRes consRes domShares resGiven demandsMap sortedDemands]
+      (let [i (first (reduce minShares domShares)) ;;
+            di (first (i demandsMap))
+            resDi (task/getResources di)
+            newDemandsMap (withDemands demandsMap i (rest (i demandsMap)))
+            newConsRes (resources/plusResources consRes resDi)
+            ui (i resGiven)
+            newResGiven (withResources resGiven i (resources/plusResources ui resDi))
+            newDomShares (shares newResGiven totRes)
+            newSortedDemands (conj sortedDemands di)
+            demandsLeft (apply concat (map (fn [[k v]] v) newDemandsMap))
+            ]
+        (if (resources/<= newConsRes totRes)
+            (internalDrf totRes newConsRes newDomShares newResGiven newDemandsMap newSortedDemands)
+            (concat newSortedDemands demandsLeft)
+          )))
+
+
+\end{minted}
+
+\caption{DRF implementation}
+\label{fig:drf-implementation}
+\end{figure}
+
+
+
 \section {How to achieve locality with a Fairness-based allocation algorithm}
 \label{sec:delayscheduling}
 
@@ -1015,11 +1071,11 @@ distributed filesystem. Then computations are executed in the nodes
 that holds the data, profitting from the fact that programs are much
 smaller than data, therefore it's quick to send the program where the
 data is stored. In summary, these frameworks profit from a property
-that is called data locality \cite{chung_maximizing_2006}.
+that is called datalocality \cite{chung_maximizing_2006}.
 
 When only one framework runs in the cluster it is easy to run every
 computation in the node that holds the data, specially since the data
-is replicated, so many nodes hold the same block of data. However as
+is replicated, so many nodes hold the same block. However as
 the number of frameworks running in the cluster increases it is more
 difficult for a scheduler to assign always the right node to every
 task. Besides, as many frameworks compete for the resources, schedulers
@@ -1104,12 +1160,13 @@ constantly of all the available resources even if they don't need them
 because they don't have tasks to run on them. Pessimistic locking in
 Omega implies assigning and arbitrary time per framework that may not
 be adequate either demanding loads of negative responses from
-frameworks or making them wait when they need resources. The most positive
-side of being able to emulate one locking in a scheduler predominantly
-based on the other kind of locking is that this avoids having to
-choose, allowing mixing, assigning a kind a locking for a subset of
-the resources of the cluster and another kind for the rest of the
-resources when appropriate.
+frameworks or making them wait when they need resources. 
+
+The most positive side of being able to emulate one locking in a
+scheduler predominantly based on the other kind of locking is that
+this avoids having to choose, allowing mixing, assigning a kind a
+locking for a subset of the resources of the cluster and another kind
+for the rest of the resources when appropriate.
 
 
 
@@ -1133,7 +1190,7 @@ The first two approaches to scheduling namely Centralized Scheduling
 and Static Partitioning had troubles ensuring those very first basic
 requirements. Centralized Scheduling has the problem that the central
 scheduler soon becomes a bottleneck and that frameworks don't have
-freedom to schedule freely. Static Partitioning doesn't ensure a good
+the possibility to schedule freely. Static Partitioning doesn't ensure a good
 use of the resources of the cluster.
 
 Leaving aside those two models, the two level model represented by
