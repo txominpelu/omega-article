@@ -14,7 +14,7 @@
 
 \begin{document}
 
-\title{ Applying smart policies to dynamic resource managers }
+\title{ Improving dynamic allocation cluster schedulers }
 
 %\titlerunning{Short form of title}        % if too long for running head
 
@@ -45,10 +45,10 @@ Fairly recently many factors have boosted a process of
 industrialization of the management of software clusters that has
 itself increased the relevance of schedulers. 
 
-The popularity of cloud platforms that brings
-many companies to opt for not having their own servers, hosting their
-services in the datacenters provided usually by the big actors of the
-web is one of these factors. 
+The popularity of cloud platforms that brings many companies to opt
+for not having their own servers, hosting their services in the
+datacenters provided usually by the big actors of the web is one of
+these factors.
 
 Another is the burst in the volume of data that companies need to deal
 with. This burst has added a new use for clusters initially thought
@@ -58,8 +58,8 @@ parallel processing a discipline that increases the possibility of
 manipulating and make sense out of bigger amounts of data.
 
 All those factors added to the increase in the number of their users
-has forced the clusters of the big companies to grow almost
-exponentially. Bigger clusters mean more complexity, higher resource
+has forced the clusters of the big companies to grow really
+quickly. Bigger clusters mean more complexity, higher resource
 consumption and higher economical value of the applications that run
 on them. Considering all of that is ease to realise of the importance
 of the good utilization of these clusters that depends significantly
@@ -79,16 +79,17 @@ a simple API, it is easy to add other applicative layers on top of
 it that can allow a relatively simple programming on top of a
 distributed environment.
 
-This movement from simple scheduler, to being the core of a distributed
-operative system has already started happening with Mesos whose simple
-API has facilitated the creation of frameworks like Aurora \ref{} or
-Marathon \ref{} that provide useful primitives for the execution
-of applications like load balancing, interservice communication,
-or automatic failover.
+This movement from simple scheduler, to being the core of a
+distributed operative system has already started happening with Mesos
+whose simple API has facilitated the creation of frameworks like
+Aurora \cite{_apache_????-1} or Marathon
+\cite{_mesosphere/marathon_????} that provide useful primitives for the
+execution of applications like load balancing, interservice
+communication, or automatic failover.
 
 The implementation of distributed filesystems can also be simplified
 thanks to a resource manager as shown by the distributed filesytem
-tachyon \ref{} that takes advantage of Mesos primitives. A side effect
+tachyon \cite{li2013tachyon} that takes advantage of Mesos primitives. A side effect
 of this is that an application running with the resource manager can
 take advantage of this distributed filesystems to refer logically to
 files stored physically in different nodes of the cluster what means
@@ -96,9 +97,9 @@ that schedulers and distributed filesystems complement each other and
 represent a big part of our distributed operative system.
 
 Other example of framework that provides operative system primitives
-on top of Mesos is Chronos \ref{} that provides simple workflow
-management and high level job scheduling and represents a higher
-level, distributed alternative to cron.
+on top of Mesos is Chronos \cite{_chronos:_????} that provides simple
+workflow management and high level job scheduling and represents a
+higher level, distributed alternative to cron.
 
 This primitives themselves greatly facilitate the implementation of
 distributed user facing services like distributed web applications
@@ -138,18 +139,17 @@ the schedulers that constitute the very core of the system.
 %%  - Distributed disk based and memory based file systems (e.g hdfs and tachyon)
 %%  - Distributed build systems (jenkins)
 
-%% FIXME: Talk about job isolation
-
 \subsection{Scientific Interest}
 
 This relevance of the scheduling process constitutes a good motivation
 for the scientific community to put effort into trying to find the
 best scheduling strategies to optimize the utilization of clusters,
 and effort that has been eased by the public release of the cluster
-traces of many big companies like \ref .Those traces allow anyone
-interested in testing improvements to the existing scheduling models
-to do it using the information taken from the logs of real
-datacenters.
+traces of many big companies like Yahoo \cite{parashar_10th_2010},
+Google \cite{mishra_towards_2010} and Facebook
+\cite{Chen:EECS-2012-17} .Those traces allow anyone interested in
+testing improvements to the existing scheduling models to do it using
+the information taken from the logs of real datacenters.
 
 Besides scheduling represents a really interesting problem with many
 factors making it a difficult task. Many types of applications can run
@@ -204,20 +204,17 @@ limitations.
 
 Finally the most innovative contributions of this project will be
 presented. First we will present a prototype implementation of both
-models that we'll be schematically explained in section
-\ref{sec:implementation} and fully accessible in annex
-\ref{annex:implementation} and that will represent in the case of
-Omega the first publicly released implementation of the model. Then in
-section \ref{sec:businessrelevance} we will fill the gap left by the
-paper that describes Omega by explaining how to add two policies
-(priorities and DRF) to ensure the consideration of business relevance
-with optimistic locking, while section \ref{sec:delayscheduling} will
-describe how we have managed to achieve both datalocality and fairness
-with DRF thanks to delay scheduling \ref. The last contribution in
-sectio \ref{sec:mixed} will be a description of how to emulate
-optimistic locking with a two level scheduler, an interesting
-technique that opens the door to setup mixed worloads in two level
-schedulers.
+models that will be schematically explained in section
+\ref{sec:implementation}. Then in section \ref{sec:businessrelevance}
+we will fill the gap left by the paper that describes Omega by
+explaining how to add two policies (priorities and DRF) to ensure the
+consideration of business relevance with optimistic locking, while
+section \ref{sec:delayscheduling} will describe how we have managed to
+achieve both datalocality and fairness with DRF thanks to delay
+scheduling \cite{zaharia_delay_2010}. The last contribution in section
+\ref{sec:mixed} will be a description of how to emulate optimistic
+locking with a two level scheduler, an interesting technique that
+opens the door to setup mixed worloads in two level schedulers.
 
 %% FIXME: Reference to Schwarkpof's paper on why is now the time to
 %% build a distributed OS
@@ -230,7 +227,7 @@ schedulers.
 \section{Archetypal Cluster}
 \label{sec:archetype}
 
-Thanks to big companies like Google \ref, Yahoo \ref and Facebook \ref that
+Thanks to big companies like Google, Yahoo and Facebook that
 have published the traces of their clusters, it is possible today to
 have an idea of the activity that happens today in a standard datacenter.
 In this section I'll define a characterization of this activity based on
@@ -241,7 +238,7 @@ by the characterization.
 
 According to Google's traces, cluster's run mainly two group of jobs that
 are characterized by their duration. Most jobs last less than 30 minutes
-and are mainly MapReduce \ref jobs while a smaller amount of jobs last
+and are mainly MapReduce jobs while a smaller amount of jobs last
 more than 18 hours and consume most of the cluster's resources. Yahoo's
 and Facebook's traces reveal the same aggregation of tasks between these
 clearly differentiated two groups.
@@ -256,11 +253,10 @@ tasks. The jobs from the second group require usually high availability and
 have more difficult placement constraints what often means that their tasks
 take longer to be scheduled.
 
-The traces released by google and publicly accesible at \ref belong to
-cluster's with more than eleven thousand machines where rates arrive
-at a pace of %%FIXME%% 
-per second, however this traces were released in 2011 so
-today's numbers have probably increased significantly.
+The traces released by google and publicly accesible at
+\cite{_googleclusterdata_????} belong to cluster's with more than
+eleven thousand machines , however this traces were released in 2011
+so today's numbers have probably increased significantly.
 
 
 \section{Historical approaches}
@@ -624,7 +620,22 @@ concurrent access to cluster's resources. This simplicity makes it
 easy for the implementation of a scheduler based on the Omega model to
 scale to bigger clusters or higher task interarrival rates.
 
-However, the freedom that the Omega provides for frameworks to
+\subsection{Omega Limitations}
+
+In its simplest version Omega was implemented without incremental
+resource allocation for tasks.  The lack of incremental resource
+allocation meant that a group of tasks for a job were only accepted
+either all or none, with just one conflict cancelling a whole
+transaction. This really inefficient model was replaced by one where
+tasks are treated independently and conflicts only affect tasks that
+are really involved in a competition for a resource.
+
+But even with incremental resource allocation and fine grained
+resource management Omega has some limitations, specially as the
+use of the cluster grows and the possibility for conflicts
+increases. 
+
+Aside from that, the freedom that the Omega provides for frameworks to
 allocate resources in its basic version comes with a drawback when
 comparing it with the two level model. While in the two level model,
 the master manages what resources are offered to what framework, in
@@ -634,39 +645,10 @@ have no way to enforce that the repartition of resources between
 frameworks is fair, or that higher priority tasks don't have to wait
 for lower priority tasks.
 
-\subsection{Omega Limitations}
-
-In its simplest version Omega was implemented without incremental
-resource allocation for tasks and without fine grained resource
-management just like the first version implemented for Omega in
-[ref]. This version had limitations ...
-
-But even with incremental resource allocation and fine grained
-resource management Omega has some limitations, specially as the
-cluster ``utilization'' grows and the possibility for conflicts
-increases. When dealing with conflicts between tasks there are some
-factors to consider:
-
- \begin{itemize}
-   \item (Task duration)If the tasks that conflict (or just the one that is
-   running) take minutes to finish, seconds or milliseconds If the
-  \item Tasks have different priority levels If the tasks are allowed to be
-  preempted or not (if they have high availability requirements they
-  can't *Note1*)
- \end{itemize}
-
-When frameworks want to schedule tasks in the cluster they could
-either specify the required machines or allow to fallback to the given
-amount of resources without considering specific tasks. It's important
-that in the case where the cluster provides a fallback mechanism this
-should be as simple as possible (for example just taking any other
-free machine).
-
-
 \section{Omega implementation}
 \label{sec:implementation}
 
-The paper \ref{} proposed an interesting model to do cluster
+The Omega paper proposed an interesting model to do cluster
 scheduling based on optimistic locking that overcomed some of the
 limitations of pesimistic locking adopted by two level schedulers like
 Mesos. However this paper didn't bring the public release of an
@@ -864,7 +846,7 @@ causes some overhead for the duplicated effort that lower priority
 tasks need to do when they're preempted.
 
 In practice this works well because by assigning the higher priority
-to the services, that provide the higher business value [ref], we can
+to the services, that provide the higher business value  we can
 ensure their high availability since no other job can preempt them,
 and give them exactly the resources they need. Assigning the Lower
 priority levels to batch jobs works well because jobs are usually less
@@ -916,23 +898,23 @@ frameworks monopolizing the control of cluster's resources.
 
 This problem has already appeared in the context of cluster scheduling
 and the solution most generally accepted is Dominant Resource Fairness
-(DRF) \ref[] that has already been applied to the Mesos two level
-scheduler. DRF considers that users care about the number of tasks
-they're allocated. The number of tasks allocated for a framework
-depends itself on dominant resource that is the resource that
-relatively demands most from the cluster, said otherwise the resource
-that demands a higher proportion of the cluster for a type of
+(DRF) \cite{ghodsi2011dominant} that has already been applied to the
+Mesos two level scheduler. DRF considers that users care about the
+number of tasks they're allocated. The number of tasks allocated for a
+framework depends itself on dominant resource that is the resource
+that relatively demands most from the cluster, said otherwise the
+resource that demands a higher proportion of the cluster for a type of
 task. The number of tasks allocated to a user depends on the dominant
 resource because it is the one that will be relatively allocated most
 of the cluster. DRF attemps therefore to give all users an equal
 amount of their dominant resources.
 
-To explain DRF I will use the model of a cluster as a simplified
-environment already used at \ref where there are $n$ users
-$u_{1},u_{2},...,u_{n}$ and the cluster is represented by a vector of
-resources $R_{1},R_{2}...,R_{m}$. Each user $i$ has a \emph{demand
-  vector} $D_{i}$, which describes its absolute per task consumption,
-e.g., $D_{2} = \langle 3, 2, 1 \rangle$ means that user $u_{2}$ tasks
+To explain DRF we will use the model of a cluster as a simplified
+environment where there are $n$ users $u_{1},u_{2},...,u_{n}$ and the
+cluster is represented by a vector of resources
+$R_{1},R_{2}...,R_{m}$. Each user $i$ has a \emph{demand vector}
+$D_{i}$, which describes its absolute per task consumption, e.g.,
+$D_{2} = \langle 3, 2, 1 \rangle$ means that user $u_{2}$ tasks
 require 3 units of resource $R_{1}$, 2 units of resource $R_{2}$ and 1
 unit of resource $R_{3}$. A user is always given resources as
 multiples of its demand vector and allocation is denoted as $A =
@@ -1001,7 +983,7 @@ distributed filesystem. Then computations are executed in the nodes
 that holds the data, profitting from the fact that programs are much
 smaller than data, therefore it's quick to send the program where the
 data is stored. In summary, these frameworks profit from a property
-that is called data locality \ref[].
+that is called data locality \cite{chung_maximizing_2006}.
 
 When only one framework runs in the cluster it is easy to run every
 computation in the node that holds the data, specially since the data
@@ -1020,17 +1002,17 @@ resources, independently of the node the framework had asked for. This
 could lead to the conclusion that achieving fairness and data locality
 at the same time is difficult.
 
-Fortunately Zaharia et. al developed in their paper \ref[] a technique
-to avoid this problem called delay scheduling. Delay scheduling is a
-simple technique that proposes to wait a given timeout before offering
-a task resources from a node that doesn't contain the data the task
-will use. To avoid that frameworks wait indefinitively after the
-timeout a task will receive resources even if they don't come from the
-node the task wanted. If the timeout is well fixed, this techniques
-achieves good data locality without compromising fairness in
-environments where data is replicated across sufficient nodes and jobs
-don't last long, what is the case for most distributed processing
-frameworks. 
+Fortunately Zaharia et. al developed in their paper
+\cite{zaharia_delay_2010} a technique to avoid this problem called
+delay scheduling. Delay scheduling is a simple technique that proposes
+to wait a given timeout before offering a task resources from a node
+that doesn't contain the data the task will use. To avoid that
+frameworks wait indefinitively after the timeout a task will receive
+resources even if they don't come from the node the task wanted. If
+the timeout is well fixed, this techniques achieves good data locality
+without compromising fairness in environments where data is replicated
+across sufficient nodes and jobs don't last long, what is the case for
+most distributed processing frameworks.
 
 %%\subsection {Implementing Delay Scheduling in Omega}
 
@@ -1123,7 +1105,7 @@ freedom to schedule freely. Static Partitioning doesn't ensure a good
 use of the resources of the cluster.
 
 Leaving aside those two models, the two level model represented by
-Mesos \ref and the optmistic approach embodied by Omega \ref are the
+Mesos and the optmistic approach embodied by Omega are the
 two models that provide the basic requirements needed for the type of
 cluster that is of interest for this article and that represents a
 mayority of the clusters that are found in today's companies. In this
@@ -1155,7 +1137,7 @@ for how to ensure that same priority jobs get similar shares of the
 resources of the cluster.
 
 In this project we have explained the way to ensure fairness between
-resources introduced by \ref and we have added an implementation of
+resources introduced by \cite{ghodsi2011dominant} and we have added an implementation of
 DRF to Omega, proving that our implementation of Omega can ensure
 fairness between same priority frameworks. 
 
@@ -1169,6 +1151,54 @@ that is relevant for them. This way applying the right timeout tasks
 achieve a good datalocality without compromising the fair allocation. 
 
 \section{Conclusions and further work}
+
+%% Scheduling is important...
+
+In the introduction we have seen that the web is evolving into the
+cloud and more services are provided through cloud platforms, more
+users use them and more data is generated, analysed and transformed
+through them. The consequence of this is that clusters need to grow
+really quickly what makes the design of the central piece of software
+that manages the cluster, the scheduler, more difficult.
+
+%% Old approaches are no longer suitable and new approaches have limitations
+
+Older approaches like centralized scheduling and static partitioning
+are no longer adapted to those new circumstances what has been a
+motivation for the apparition of two new models: two level scheduling
+represented my Apache Mesos and optimistic locking represented by
+Omega. This models have many advantages but also their limitations
+specially the limitations of pessimistic locking for Mesos and the
+lack of implementation and of a fairness policy for Omega. 
+
+%% We propose the following improvements 
+
+In this project we have proposed a first prototype implementation of Omega that
+comes together with an implementation of Mesos that has been used for
+comparation purposes. This implementation of Omega has allowed us to
+propose a mechanism to ensure fairness of Omega thanks to the
+algorithm DRF. However adding DRF or any other fairness algorithm
+diminishes the likelihood of frameworks of getting the nodes that they
+want to execute their jobs, said otherwise it attemps against
+datalocality. That is why in our latest contribution we've proposed to
+modify the allocation algorithm of Omega to do delay scheduling this
+why finding the right compromise in between fairness and datalocality.
+
+
+%% However they lack...
+
+However the implementations that this project has made of Mesos and
+Omega are really simple prototypes that make many simplifications when
+compared with the actual challenges faced by real world cluster
+schedulers and are of use only for experimentation and comprehension
+of the model. 
+
+Therefore further work in this project would include as a first step
+improving the stability of the implementations to be able to do test
+on them with some of the traces of real clusters that have been
+publicly released, this way been able to test in a near real
+environment the modifications that have been proposed in the project.
+
 
 %\section{Experiments}
 %Two-level schedulers have been proven to deal badly with long scheduling decision times and

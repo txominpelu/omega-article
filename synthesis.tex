@@ -105,14 +105,17 @@ description of how to emulate optimistic locking with a two level
 scheduler, an interesting technique that opens the door to setup mixed
 worloads in two level schedulers.
 
+However the implementations that this project has made of Mesos and
+Omega are really simple prototypes that make many simplifications when
+compared with the actual challenges faced by real world cluster
+schedulers and are of use only for experimentation and comprehension
+of the model. 
 
-The interest of this project stems from the analysis that it
-mades of the most relevant scheduling strategies with an in depth look
-at the two more recent ones two level scheduling and Omega. This study
-is supported by an implementation of ... 
-
-
-
+Therefore further work in this project would include as a first step
+improving the stability of the implementations to be able to do test
+on them with some of the traces of real clusters that have been
+publicly released, this way been able to test in a near real
+environment the modifications that have been proposed in the project.
 
 
 %% La fiche de synthèse doit contenir les éléments suivants :
