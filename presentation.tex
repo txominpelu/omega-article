@@ -1,10 +1,11 @@
-\documentclass[notes]{beamer}
+\documentclass[notes=hide]{beamer}
 \usepackage{graphicx}
 \usetheme{Warsaw}
-\title{Cluster Scheduling}
+\title{Improving dynamic allocation in cluster schedulers}
 \author{Inigo Mediavilla}
 \date\today
-\setbeamertemplate{note page}[plain]
+%%\setbeamertemplate{note page}[plain]
+\setbeamertemplate{page}[plain]
 
 \graphicspath{ {./images/} }
 
@@ -23,6 +24,12 @@
     are called jobs in an execution environment with a limited amount
     of resources.
     \end{definition}
+  \end{frame}
+
+  \note{}
+
+  \begin{frame}
+    \frametitle{Scheduling}
     \begin{itemize}
       \item Why is it relevant?
       \begin{itemize}
@@ -33,30 +40,27 @@
         \item Increasing popularity of distributed processing
       \end{itemize}
     \end{itemize}
-  \end{frame}
-
-  \note{}
-
-  \begin{frame}
-    \frametitle{Why is it difficult?}
     \begin{itemize}
-      \item Increasing size of clusters
-      \item Growing number of jobs to run
-      \item Jobs are more sensitive to scheduling delays
-      \item Diversity of scheduling needs
-    \end{itemize}
+      \item Why is it difficult?
+        \begin{itemize}
+          \item Increasing size of clusters
+          \item Growing number of jobs to run
+          \item Jobs are more sensitive to scheduling delays
+          \item Diversity of scheduling needs
+        \end{itemize}
+     \end{itemize}
   \end{frame}
 
   \note{}
 
   \begin{frame}
     \frametitle{Different Approaches}
-    \begin{itemize}
+    \begin{enumerate}
       \item Centralized Scheduler (single-path or multi-path)
       \item Static partitioning
       \item Two level Schedulers (i.e. Mesos)
       \item Optimistic locking (i.e. Omega)
-    \end{itemize}
+    \end{enumerate}
   \end{frame}
 
   \note{}
@@ -65,7 +69,7 @@
     \frametitle{Centralized Scheduler}
     \begin{columns}[T]
        \begin{column}{.5\textwidth}
-        \begin{block}{Advantages/Disadvantages}
+        \begin{block}{Pros/Cons}
             \begin{itemize}
               \item[+] Initially simple
               \item[+] Efficient policies with few frameworks
@@ -89,7 +93,7 @@
     \frametitle{Static partitioning}
        \begin{columns}[T]
        \begin{column}{.5\textwidth}
-        \begin{block}{Advantages/Disadvantages}
+        \begin{block}{Pros/Cons}
 
             \begin{itemize}
               \item[+] Frameworks can schedule the way they want 
@@ -99,7 +103,7 @@
         \end{block}
         \end{column}
         \begin{column}{.6\textwidth}
-         \includegraphics[trim = 0mm 0mm 50mm 0mm,clip,scale=0.20,natwidth=960,natheight=720]{StaticPartitioning.png}
+         \includegraphics[trim = 40mm 30mm 30mm 40mm,clip,scale=0.30,natwidth=960,natheight=720]{StaticPartitioning-slides.png}
         \end{column}
       \end{columns}
   \end{frame}
@@ -123,14 +127,10 @@
   \note{}
 
   \begin{frame}
-    \frametitle{Two-Level Scheduler - Pros and Cons}
+    \frametitle{Two-Level Scheduler}
        \begin{columns}[T]
        \begin{column}{.5\textwidth}
-        \begin{block}{Process}
-           Frameworks receive offers for the available resources 
-           from the scheduler. 
-        \end{block}
-        \begin{block}{Advantages/Disadvantages}
+        \begin{block}{Pros/Cons}
             \begin{itemize}
               \item[+] Resources are no longer compartimented
               \item[+] No possibility of conflicts
@@ -140,7 +140,7 @@
         \end{block}
         \end{column}
         \begin{column}{.6\textwidth}
-         \includegraphics[trim = 0mm 0mm 10mm 0mm,clip,scale=0.18,natwidth=960,natheight=720]{TwoLevel.png}
+         \includegraphics[trim = 50mm 0mm 0mm 0mm,clip,scale=0.30,natwidth=960,natheight=720]{TwoLevel-slides.png}
         \end{column}
       \end{columns}
   \end{frame}
@@ -162,34 +162,38 @@
 
 
   \begin{frame}
-    \frametitle{Omega Scheduler - Advantages}
-    \begin{itemize}
-      \item[+] Frameworks don't hold locks
-      \item[+] Inactive frameworks don't interfere
-      \item[+] Slow scheduling frameworks don't block others
-      \item[+] Frameworks can dynamically adjust their effort when 
-            the cluster is not busy
-      \item[-] No implementation proposed
-      \item[-] No fairness mechanism (proposed priorities and post-facto monitoring)
-    \end{itemize}
+    \frametitle{Omega Scheduler}
+       \begin{columns}[T]
+       \begin{column}{.5\textwidth}
+        \begin{block}{Pros/Cons}
+            \begin{itemize}
+              \item[+] Frameworks don't lock
+              \item[+] Slow scheduling don't block
+              \item[+] Frameworks can be elastic 
+              \item[-] No implementation 
+              \item[-] No fairness 
+            \end{itemize}
+         \end{block}
+       \end{column}
+       \begin{column}{.6\textwidth}
+         \includegraphics[trim = 50mm 0mm 0mm 0mm,clip,scale=0.30,natwidth=960,natheight=720]{Omega.png}
+       \end{column}
+       \end{columns}
   \end{frame}
 
   \note{}
 
   \begin{frame}
     \frametitle{Contributions}
-    \begin{itemize}
+    \begin{enumerate}
         \item Prototype implementations of Mesos and Omega
-        \item Study of Offer-all vs Fair share alternatives for Mesos
-        \item Simulation optimistic locking with Mesos (and the other way around)
         \item Fairness and Data-locality proposition for Omega
-    \end{itemize}
+        \item Simulation optimistic locking with Mesos 
+    \end{enumerate}
   \end{frame}
 
-  \note{}
+  \note{
 
-  \begin{frame}
-    \frametitle{Prototype implementations}
     \begin{itemize}
         \item Omega's is first proposed implementation
         \item Allow to:
@@ -209,30 +213,7 @@
             \item No high volumes of traces run against the prototypes
           \end{itemize}
     \end{itemize}
-  \end{frame}
-
-  \note{}
-
-  \begin{frame}
-    \frametitle{Study of Offer-all vs Fair share alternatives}
-    \begin{itemize}
-      \item Nothing
-    \end{itemize}
-  \end{frame}
-
-  \note{}
-
-  \begin{frame}
-    \frametitle{Simulating optimistic locking with Mesos}
-    \begin{itemize}
-      \item How does it work?
-      \item Requirements
-      \item Advantages, Disadvantages
-      \item Interest of Mixed strategy
-    \end{itemize}
-  \end{frame}
-
-  \note{}
+  }
 
   \begin{frame}
     \frametitle{Fairness and datalocality proposition for Omega}
@@ -245,6 +226,127 @@
   \end{frame}
 
   \note{}
+
+
+  \begin{frame}
+    \frametitle{Simulating optimistic locking with Mesos}
+       \begin{columns}[T]
+       \begin{column}{.4\textwidth}
+        \begin{block}{Simulation}
+            \begin{itemize}
+              \item How does it work?
+              \item Advantages/ Disadvantages
+              \item Mixed strategy
+            \end{itemize}
+         \end{block}
+       \end{column}
+       \begin{column}{.65\textwidth}
+         \includegraphics[trim = 63mm 20mm 0mm 20mm,clip,scale=0.35,natwidth=960,natheight=720]{MesosOptimisticLocking-slides.png}
+       \end{column}
+       \end{columns}
+  \end{frame}
+
+
+  \note{
+    It is an improvement over Mesos that allows to emulate the
+    optimistic locking model of Omega in Mesos.
+
+    It works by changing the usual model of Mesos where only one
+    resource is offered to one framework at a time, to a model where
+    available resources are offered to all frameworks at the same
+    time this way avoiding the problems of pessimistic locking.
+
+    This improvement would allow with a few simple modifications of
+    Mesos to emulate Omega in Mesos, however it has some limitations
+    when compared with Omega in terms of efficiency. While in Omega
+    only if a framework wants resources it will make a demand, in this
+    model frameworks are constantly communicating with the Master even
+    if they are not interested in running a task.
+    
+    Despite it's limitations this model its really interesting and we
+    would like it with a proof of concept implementation of it because
+    it allows not having to decide between the Omega or the Mesos
+    model. It allows a mixed workload where a part of the cluster runs
+    with Mesos normal configuration and the rest with an Omega-like
+    approach, making Mesos adapt better to any kind of workload.
+
+  }
+
+  \begin{frame}
+    \frametitle{Conclusions}
+    \begin{itemize}
+      \item Prototype implementations of Mesos and Omega 
+      \begin{itemize}
+        \item Useful to test and understand the models
+        \item Help to come up with contributions
+       \end{itemize}
+       \item Proof that is feasible  a
+         production-ready Omega
+        \begin{itemize}
+          \item Simplicity of the model
+          \item Addition of fairness and datalocality
+        \end{itemize}
+       \item Meanwhile Mesos with optimistic locking as an alternative 
+        \begin{itemize}
+          \item Has some limitations 
+          \item But supports mixed strategies 
+        \end{itemize}
+
+    \end{itemize}
+  \end{frame}
+
+  \note{
+    The prototype implementations of the two most important models has
+    proved really useful as a way to understand better the
+    implications of the two different models (Mesos y Omega) and has
+    allowed us to experiment with new features and come up with contributions.
+
+    The addition of an algorithm to manage fairness and datalocality
+    in Omega and the implementation in a prototype its really
+    promising because it shows that it is feasible to define a in the
+    mid term a production ready implementation of Omega that could be
+    opensourced and compete with Mesos.
+
+    In the short term we've proposed a way to simulate Omega in Mesos
+    what could bring quickly some of the benefits of the model behind
+    Omega to a fully featured cluster scheduler like Mesos.
+
+    
+
+  }
+
+  \begin{frame}
+    \frametitle{Future work}
+    \begin{itemize}
+      \item Add optimistic locking to Mesos
+      \item Further test contributions 
+      \begin{itemize}
+        \item Test against google's traces
+       \end{itemize}
+      \item Add features to Omega prototype
+      \begin{itemize}
+        \item Provide isolation, failover, a nice API
+        \item Add documentation
+        \item Add easy setup of a cluster
+       \end{itemize}
+      \item Improve DRF
+      \begin{itemize}
+        \item Add weighted DRF
+        \item Simpler datalocality aware DRF
+       \end{itemize}
+
+    \end{itemize}
+  \end{frame}
+
+  \note{
+
+  }
+
+  \begin{frame}
+    \frametitle{Questions}
+    \includegraphics[trim = 0mm 0mm 25mm 0mm,clip,scale=0.35,natwidth=960,natheight=720]{Question.png}
+  \end{frame}
+
 
 \end{document}
 %Final Goals
@@ -286,75 +388,6 @@
 %  - Scale when the cluster grows
 %  - Be simple (Ideally)
 
-
-
-%  \begin{frame}
-%    \frametitle{Goals}
-%    \begin{itemize} 
-%     \item Execute Jobs within given constraints
-%       \begin{itemize}
-%         \item Two different kinds of jobs (services and batch jobs)
-%         \item Types of job constraints
-%         \begin{itemize}
-%           \item Execution time
-%           \item High availability
-%           \item Failover
-%           \item Data locality
-%         \end{itemize}
-%       \end{itemize}
-%     \item (Secondary) Maximize cluster utilization
-%    \end{itemize}
-%    %Content goes here
-%  \end{frame}
-%  \begin{frame}
-%    \frametitle{Difficulties}
-%    \begin{itemize}
-%      \item Scheduler needs to scale as the cluster grows
-%      \item Scheduler needs to be highly available
-%      \item Heterogenous mixed of jobs to execute 
-%            (batch/services, hadoop vs MPI, ..)
-%            \em (Different scheduling needs) 
-%      \item New data processing frameworks demand subsecond scheduling times for 
-%            their tasks
-%      \item Ideally the scheduler needs to be simple
-%    \end{itemize}
-%    %More content goes here
-%  \end{frame}
-%  \begin{frame}
-%    Existing scheduling solutions
-%    \begin{itemize}
-%      \item Centralized Scheduler
-%%      \item Static Partitioning
-%      \item Two-level phase scheduler (Mesos, YARN)
-%      \item Distributed optimisted locking scheduler (Omega)
-%      \item Fully distributed scheduler (Sparrow) - Specialized for data processing
-%            jobs
-%%    \end{itemize}
-%  \end{frame}
-%  \begin{frame}
-%    \begin{itemize}
-%%      \item Centralized Scheduler
-%      \begin{itemize}
-%        \item Pros
-%%        \begin{itemize}
-%          \item Control over the whole cluster
-%%          \item Can achieve good cluster utilization
-%          \item Can be simple when there's only one framework running in the cluster
-%        \end{itemize}
-%%%      \end{itemize}
-%      \begin{itemize}
-%        \item Cons
-%%        \begin{itemize}
-%          \item Single point of failure
-%          \item Doesn't scale (bottleneck)
-%          \item It becomes really complex with an environment where many kinds of 
-%                jobs are executed
-%          \item It doesn't scale well
-%        \end{itemize}
-%      \end{itemize}
-%    \end{itemize}
-%
-%  \end{frame}
 
 
 

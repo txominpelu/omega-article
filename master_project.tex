@@ -212,7 +212,7 @@ optimistic locking that avoids some inconveniences of the two level
 model. However only the model behind Omega has been publicly exposed,
 so no available implementation exists that can be used to test Omega
 in different contexts. Besides, the Omega paper does not propose an
-explanation to how to take into account bussiness relevance in the
+explanation to how to take into account business relevance in the
 context where frameworks compete for the same resource or how to avoid
 problems with \emph{rogue} frameworks apart from a basic notion of
 priorities and post-facto monitoring.
@@ -221,7 +221,7 @@ priorities and post-facto monitoring.
 
 This project will start with a description of the archetypal situation
 that a cluster scheduler faces in today's datacenters in section
-\ref{sec:archetype} and with a brief comparation in section
+\ref{sec:archetype} and with a brief comparison in section
 \ref{sec:approaches} of how the historical approaches to cluster
 scheduling namely centralized scheduling and static partitioning deal
 with it, showing their positive and negative aspects. Then we will
@@ -243,7 +243,7 @@ achieve both datalocality and fairness with DRF thanks to delay
 scheduling \cite{zaharia_delay_2010}. The last contribution in section
 \ref{sec:mixed} will be a description of how to emulate optimistic
 locking with a two level scheduler, an interesting technique that
-opens the door to setup mixed worloads in two level schedulers.
+opens the door to setup mixed workloads in two level schedulers.
 
 %% FIXME: Reference to Schwarkpof's paper on why is now the time to
 %% build a distributed OS
@@ -276,13 +276,13 @@ Qualitatively speaking the jobs from the first group are mainly parallel
 data processing jobs that belong to a myriad of frameworks that includes
 MapReduce frameworks like Hadoop, graph processing architectures like
 Giraph or Pregel, those specialized for incremental processing like Spark, 
-google's Dremel, and Percolator but also MPI jobs. An heterogenous group
+google's Dremel, and Percolator but also MPI jobs. An heterogeneous group
 of frameworks that uses completely different strategies to scheduler their
 tasks. The jobs from the second group require usually high availability and
 have more difficult placement constraints what often means that their tasks
 take longer to be scheduled.
 
-The traces released by google and publicly accesible at
+The traces released by google and publicly accessible at
 \cite{_googleclusterdata_????} belong to cluster's with more than
 eleven thousand machines , however this traces were released in 2011
 so today's numbers have probably increased significantly.
@@ -321,12 +321,12 @@ cluster increases or as the jobs executed in the cluster
 diversify. When the number of jobs to execute increases, the central
 scheduler needs to be able to keep with the pace of jobs that are
 planned. On top of that a single scheduler represents a single point
-of failure. Parallelization can atenuate both problems but just at the
+of failure. Parallelization can attenuate both problems but just at the
 expense of adding complexity and introducing the need for synchronization
 between the schedulers.
 
 Above all, for a centralized scheduler it is difficult to adapt
-adequately to the heterogeinity of jobs that is executed in today's
+adequately to the heterogeneity of jobs that is executed in today's
 clusters \cite{37201}. Trying to define different scheduling paths for
 the different types of workloads is difficult because it requires
 algorithms to identify the type of a job, and comes at the expense of
@@ -482,7 +482,7 @@ processes bound by the same rules regarding: \\
 
 \begin{itemize}
   \item Resource limiting.
-  \item Priorization.
+  \item Prioritization.
   \item Accounting.
   \item Control, checkpointing and restarting.
 \end{itemize}
@@ -498,7 +498,7 @@ environment without the overcharge of virtual machines. However, due
 to some of its features, control groups are the perfect ally of a
 scheduler when it comes to doing resource allocation since they provide
 a really fine granularity for controlling the use of resources such
-as CPU use, network bandwith, I/O throughput, memory and file system 
+as CPU use, network bandwidth, I/O throughput, memory and file system 
 cache they even provide accounting and the possibility of doing
 checkpointing and restarting a really useful feature when a scheduler
 needs to do preemption over jobs.
@@ -649,7 +649,7 @@ model based on offers used by Mesos. In its basic version, Omega
 represents just a thin layer that manages conflict resolution for
 concurrent access to cluster's resources. This simplicity makes it
 easy for the implementation of a scheduler based on the Omega model to
-scale to bigger clusters or higher task interarrival rates.
+scale to bigger clusters or higher task arrival rates.
 
 \section{Omega Limitations}
 
@@ -672,7 +672,7 @@ allocate resources in its basic version comes with a drawback when
 comparing it with the two level model. While in the two level model,
 the master manages what resources are offered to what framework, in
 its basic version Omega only accepts or rejects framework's demands
-based on wether the resources are available or not.  Therefore Omega
+based on whether the resources are available or not.  Therefore Omega
 have no way to enforce that the repartition of resources between
 frameworks is fair, or that higher priority tasks don't have to wait
 for lower priority tasks.
@@ -681,8 +681,8 @@ for lower priority tasks.
 \label{sec:implementation}
 
 The Omega paper proposed an interesting model to do cluster
-scheduling based on optimistic locking that overcomed some of the
-limitations of pesimistic locking adopted by two level schedulers like
+scheduling based on optimistic locking that overcome some of the
+limitations of pessimistic locking adopted by two level schedulers like
 Mesos. However this paper didn't bring the public release of an
 implementation of a scheduler following the premises of the
 model. 
@@ -695,6 +695,8 @@ the scheduling mechanism of Omega and compare it with the core of
 Mesos what will serve us to see the similarities and differences
 between both approaches.
 
+The implementation is available at \cite{_project_scheduler_????}.
+
 \section{Scheduling Domain}
 
 The main concepts behind the domain of scheduling are:
@@ -703,14 +705,14 @@ The main concepts behind the domain of scheduling are:
   \item[Cluster] \hfill \\
   Represents all the available resources available for the frameworks
   to run computations in the environment. This datatype contains the
-  resources that are currently avalaible and that can be used to
+  resources that are currently available and that can be used to
   schedule tasks, the frameworks that are currently registered as well
   as a list of channels that are used by frameworks to make demands of
   resources for tasks, register or unregister themselves for the
   cluster and notify of finished tasks and therefore released resources.
   \item[Framework] \hfill \\
   Represents an application that will execute computations
-  distributedly. It encapsulates a list of tasks that the application
+  in a distributed fashion. It encapsulates a list of tasks that the application
   wants to run with the resources the tasks need and takes care of
   talking with the scheduler to tell him about the tasks it wants to
   run or accepting or refusing offers in the case of Mesos.
@@ -718,7 +720,7 @@ The main concepts behind the domain of scheduling are:
   Resources are just a representation of the computational power that
   a cluster offers to run tasks. Our implementation contains only the
   number of CPUs and memory units but other schedulers offer control
-  over the I/O or the network bandwith. \\
+  over the I/O or the network bandwidth. \\
 
   An initial implementation of the scheduler represented the resources
   of the cluster as a whole, without specifying what slaves the
@@ -730,10 +732,10 @@ The main concepts behind the domain of scheduling are:
   
   An interesting property of this datatype is that as resources are
   freed and liberated by tasks resources need to be added and
-  substracted what defines an arithmetic of resources where the
+  subtracted what defines an arithmetic of resources where the
   addition represents a monoid.
   \item[Task] \hfill \\
-  Is a computation that a framework needs to execute to fulfil its
+  Is a computation that a framework needs to execute to fulfill its
   objectives. Depending on the implementation the task may be
   responsible of notifying the scheduler when it finishes and its
   resources can be freed.
@@ -767,15 +769,16 @@ of the two models.
       [sorting]
       (fn [cluster]
         (let [finishedCh (cluster/getFinishedCh cluster)
-            demandsCh  (cluster/getDemandsCh cluster)
-            events  (channel/readAll [finishedCh demandsCh])
-            demands (channel/belongingTo events demandsCh)
-            finishedTasks (channel/belongingTo events finishedCh)
-            finishedRes (map task/getResources finishedTasks)
-            resourcesFreed (reduce resources/plusResources finishedRes)
-            cluster (cluster/addResources cluster resourcesFreed) ]
-            (reduce cluster/tryCommitDemand {:cluster cluster :logs []} 
-                                               (sorting cluster demands)))))
+          demandsCh  (cluster/getDemandsCh cluster)
+          events  (channel/readAll [finishedCh demandsCh])
+          demands (channel/belongingTo events demandsCh)
+          finishedTasks (channel/belongingTo events finishedCh)
+          finishedRes (map task/getResources finishedTasks)
+          resourcesFreed (reduce resources/plusResources finishedRes)
+          cluster (cluster/addResources cluster resourcesFreed) ]
+          (reduce cluster/tryCommitDemand
+                 {:cluster cluster :logs []}
+                 (sorting cluster demands)))))
 
 \end{minted}
 \caption{Core of the Omega Scheduling algorithm}
@@ -822,9 +825,12 @@ purposes.
             finished   (channel/belongingTo events finishedCh)
             registered (channel/belongingTo events registerCh)
             resources (updateResources resources finished)
-            frameworks (framework/updateFrameworks frameworks registered [])
+            frameworks (framework/updateFrameworks frameworks
+                                                   registered [])
             ]
-        (reduce offerToAll (cluster/withResources cluster resources) frameworks)))
+        (reduce offerToAll
+               (cluster/withResources cluster resources)
+               frameworks)))
 
 \end{minted}
 \caption{Core of the Mesos Scheduling algorithm}
@@ -849,16 +855,16 @@ cluster.
                gobble=2,
                frame=lines,
                framesep=2mm]{clojure}
-    (defn offerToAll
-      [cluster fr]
-      (let [{demands :tasks newFr :framework}
-                  (framework/offeredResources (cluster/getResources cluster) fr)
-            resources (map task/getResources demands)
-            resourcesTaken (reduce resources/plusResources resources)
-            newCluster (cluster/substractResources cluster resourcesTaken)
-            newFrameworks (conj (cluster/getFrameworks newCluster) newFr)]
-            (doall (for [d demands] ((task/getTask d))))
-            (cluster/withFrameworks newCluster (set newFrameworks))))
+  (defn offerToAll
+   [cluster fr]
+   (let [{demands :tasks newFr :framework}
+     (framework/offeredResources (cluster/getResources cluster) fr)
+     resources (map task/getResources demands)
+     resourcesTaken (reduce resources/plusResources resources)
+     newCluster (cluster/substractResources cluster resourcesTaken)
+     newFrameworks (conj (cluster/getFrameworks newCluster) newFr)]
+     (doall (for [d demands] ((task/getTask d))))
+     (cluster/withFrameworks newCluster (set newFrameworks))))
 
 \end{minted}
 
@@ -885,7 +891,7 @@ A really simple yet fairly powerful way to consider business needs
 when many frameworks want to use the same resources at the same time
 is assigning priorities. In the competition for resources, tasks with
 higher priorities will always win against lower priority tasks. In the
-case where lower priority taks have already their resources assigned
+case where lower priority tasks have already their resources assigned
 preemption will be used to ensure that the order is respected and that
 low priority tasks don't slow down high priority tasks even if this
 causes some overhead for the duplicated effort that lower priority
@@ -955,7 +961,7 @@ relatively demands most from the cluster, said otherwise the resource
 that demands a higher proportion of the cluster for a type of
 task. The number of tasks allocated to a user depends on the dominant
 resource because it is the one that will be relatively allocated most
-of the cluster. DRF attemps therefore to give all users an equal
+of the cluster. DRF attempts therefore to give all users an equal
 amount of their dominant resources.
 
 To explain DRF we will use the model of a cluster as a simplified
@@ -980,7 +986,7 @@ $s_{i,j} = a_{i}D_{i,j}/r_{j}$.
 An repartition of resources is \emph{Pareto efficient} if it's impossible
 to find another repartition where at least one user has more tasks
 allocated and all the other users have at least the same tasks. In some 
-situations pareto efficienty is incompatible with equal dominant resource
+situations pareto efficiency is incompatible with equal dominant resource
 allocation between users, for example if a one user's dominant resource
 is not needed at all by the others like figure ~\ref{fig:nonpareto} shows. \\
 
@@ -1004,12 +1010,12 @@ relevant criteria that are related to fairness: \\
 
 \begin{description}
   \item[Pareto Optimality (PO)] Already described in the previous
-  section this criterium marks a repartition of resources where
+  section this criterion marks a repartition of resources where
   no more tasks can be allocated to user preserving other users'
   allocations.
   \item[Sharing Incentives]  Users are at least as happy as they
   would be under an equal split of the resources.
-  \item[Envy-Freeness] Users can't benefit from swaping their
+  \item[Envy-Freeness] Users can't benefit from swapping their
   allocated resources with other users.
   \item[Strategyproofness] Users cannot gain by misreporting
   their demands.
@@ -1037,16 +1043,25 @@ corresponds to the following piece of code:
       (let [i (first (reduce minShares domShares)) ;;
             di (first (i demandsMap))
             resDi (task/getResources di)
-            newDemandsMap (withDemands demandsMap i (rest (i demandsMap)))
+            newDemandsMap (withDemands demandsMap i
+                                        (rest (i demandsMap)))
             newConsRes (resources/plusResources consRes resDi)
             ui (i resGiven)
-            newResGiven (withResources resGiven i (resources/plusResources ui resDi))
+            newResGiven (withResources resGiven i
+                          (resources/plusResources ui resDi))
             newDomShares (shares newResGiven totRes)
             newSortedDemands (conj sortedDemands di)
-            demandsLeft (apply concat (map (fn [[k v]] v) newDemandsMap))
+            demandsLeft (apply concat
+                          (map (fn [[k v]] v) newDemandsMap))
             ]
         (if (resources/<= newConsRes totRes)
-            (internalDrf totRes newConsRes newDomShares newResGiven newDemandsMap newSortedDemands)
+            (internalDrf
+               totRes
+               newConsRes
+               newDomShares
+               newResGiven
+               newDemandsMap
+               newSortedDemands)
             (concat newSortedDemands demandsLeft)
           )))
 
@@ -1079,7 +1094,7 @@ is replicated, so many nodes hold the same block. However as
 the number of frameworks running in the cluster increases it is more
 difficult for a scheduler to assign always the right node to every
 task. Besides, as many frameworks compete for the resources, schedulers
-start considering fairness as the most important criterium, to ensure
+start considering fairness as the most important criterion, to ensure
 that the different frameworks get their fair share of the cluster.
 
 The problem is that as we've seen with the example of DRF, fairness
@@ -1095,7 +1110,7 @@ Fortunately Zaharia et. al developed in their paper
 delay scheduling. Delay scheduling is a simple technique that proposes
 to wait a given timeout before offering a task resources from a node
 that doesn't contain the data the task will use. To avoid that
-frameworks wait indefinitively after the timeout a task will receive
+frameworks wait indefinitely after the timeout a task will receive
 resources even if they don't come from the node the task wanted. If
 the timeout is well fixed, this techniques achieves good data locality
 without compromising fairness in environments where data is replicated
@@ -1108,15 +1123,15 @@ most distributed processing frameworks.
 \section {Isomorphism between Omega and two-level schedulers}
 \label{sec:mixed}
 
-Pesimistic and optimistic locking have both advantages and
-disadvantages, sometimes pesimistic locking of resources where
+Pessimistic and optimistic locking have both advantages and
+disadvantages, sometimes pessimistic locking of resources where
 resources are kept by a framework for the duration of an offer is
 simpler and more adequate since frameworks holding that kind of offer
 know that the resources belong to them and if they run tasks on them
 they know those tasks would run and they won't be preempted. We have
 already seen the advantages of optimistic locking in terms of
 efficiency. However for the moment we had seen optimistic and
-pesimistic locking as the two opposite sides of a coin and frameworks
+pessimistic locking as the two opposite sides of a coin and frameworks
 implementing allocations based on either one or the other. In this
 section we will see that both two level schedulers and Omega-like
 schedulers can provide some support for both kinds of locking.
@@ -1183,7 +1198,7 @@ This project focuses on cluster environments where different
 frameworks compete for resources. In this kind of environment the
 scheduler is in charge of dispatching resources quick enough
 so that the scheduler doesn't become a bottleneck and that every
-framework can control the way it schedules its tasks whily ensuring
+framework can control the way it schedules its tasks while ensuring
 a good use of the cluster's resources. 
 
 The first two approaches to scheduling namely Centralized Scheduling
@@ -1194,10 +1209,10 @@ the possibility to schedule freely. Static Partitioning doesn't ensure a good
 use of the resources of the cluster.
 
 Leaving aside those two models, the two level model represented by
-Mesos and the optmistic approach embodied by Omega are the
+Mesos and the optimistic approach embodied by Omega are the
 two models that provide the basic requirements needed for the type of
 cluster that is of interest for this article and that represents a
-mayority of the clusters that are found in today's companies. In this
+majority of the clusters that are found in today's companies. In this
 section we will quickly have a look at those models' limitations and
 how we have tried to overcome some of them.
 
@@ -1268,7 +1283,7 @@ comparation purposes. This implementation of Omega has allowed us to
 propose a mechanism to ensure fairness of Omega thanks to the
 algorithm DRF. However adding DRF or any other fairness algorithm
 diminishes the likelihood of frameworks of getting the nodes that they
-want to execute their jobs, said otherwise it attemps against
+want to execute their jobs, said otherwise it attempts against
 datalocality. That is why in our latest contribution we've proposed to
 modify the allocation algorithm of Omega to do delay scheduling this
 why finding the right compromise in between fairness and datalocality.
@@ -1325,7 +1340,7 @@ environment the modifications that have been proposed in the project.
 %% - Explained the isomorphism between two-level scheduler and Omega
 
 %% Future research directions
-%%  - Playing game between frameworks thanks to Omega's transparence
+%%  - Playing game between frameworks thanks to Omega's transparency
 %%  (be more concrete)
 %%  - Replace DRF + Delay scheduling by a Fairness + Data locality
 %%  aware algorithm

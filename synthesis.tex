@@ -8,7 +8,7 @@
 
 \begin{document}
 
-\title{ Applying smart policies to dynamic resource managers }
+\title{ Improving dynamic allocation in cluster schedulers }
 
 %\titlerunning{Short form of title}        % if too long for running head
 
@@ -42,17 +42,17 @@ models have been proposed that are more adapted to deal with the
 circumstances that are present in todays' clusters.
 
 The first to appear was the two level model represented by Mesos that
-is based on a centralized scheduler (called master according to Mesos'
-terminology) that has direct access to the state of the cluster and
-knows what resources are available. At a lower level the frameworks
-that want to run tasks in the cluster register to the master who will
-make offers for the resources available. Frameworks have the right to
-accept or refuse the offers they get. When they accept they just need
-to specify what tasks they want to run and what resources from what
-they have been offered they want to dedicate to the tasks. 
+is based on a centralized scheduler (called master according to the
+terminology used by Mesos) that has direct access to the state of the
+cluster and knows what resources are available. At a lower level the
+frameworks that want to run tasks in the cluster register to the
+master who will make offers for the available resources. Frameworks
+have the right to accept or refuse the offers they get. When they
+accept they just need to specify what tasks they want to run and what
+resources they want to dedicate to them.
 
 The model behind mesos works well in general terms but it has some
-inefficiencies and it doesn't weel with some specific cases. For
+inefficiencies and it doesn't work well with some specific cases. For
 example the model is based on offering the available resources to one
 framework at a time, this means that if a framework doesn't reply
 quickly to the offer all the other frameworks have to wait. In the
@@ -61,12 +61,12 @@ ready to launch a task if the proactive framework is unlucky he may
 need to wait for all other frameworks to reply negatively before it
 can receive its offer.
 
-To overcome some of this limitations engineers at Google developed a
+To overcome some of these limitations engineers at Google developed a
 new model that they called Omega. Omega is a model that is based on
-making all the resources available visible to all
+making the state of the cluster visible to all
 frameworks. Frameworks make demands to the scheduler for resources
 when they want. Since frameworks are kept up to date on the state of
-the cluster they most of the time the make demands for resources that
+the cluster most of the time they make demands for resources that
 are free and their demands are accepted. However if two or more
 frameworks make a request for the same resource at the same time the
 central scheduler takes care of resolving the conflict and notifying
@@ -81,44 +81,35 @@ of the scheduler publicly available. Besides, the paper where Omega is
 described doesn't provide any information on the problem of how to
 ensure that frameworks competing for resources get their fair share of
 the cluster's resources, or how to solve the dilemma of how to provide
-fairness in allocations while preserving datalocality.
+fairness in allocations while preserving datalocality a property that
+ensures that jobs are executed next to the data they need.
 
-This project will start with a description of the archetypal situation
-that a cluster scheduler faces in today's datacenters and with a brief
-comparation of how the historical approaches to cluster scheduling
-namely centralized scheduling and static partitioning deal with it,
-showing their positive and negative aspects. Then we will study in
-depth the two main approaches that have been published recently to
-deal with dynamic allocation of resources for competing frameworks
-showing their high level model, their features as well as their
-advantages and limitations.
-
-Finally the most innovative contributions of this project will be
-presented. First we will present a prototype implementation of both
-models that we'll be schematically explained . Then we will fill the
-gap left by the paper that describes Omega by explaining how to add
-two policies (priorities and DRF) to ensure the consideration of
-business relevance with optimistic locking. We will also describe how
-we have managed to achieve both datalocality and fairness with DRF
-thanks to delay scheduling. The last contribution will be a
-description of how to emulate optimistic locking with a two level
-scheduler, an interesting technique that opens the door to setup mixed
-worloads in two level schedulers.
+This project presents a prototype implementation of both Mesos
+and Omega. Then it fills the gap left by the paper that
+describes Omega by explaining how to add two policies (priorities and
+DRF) to ensure the consideration of business relevance with optimistic
+locking. It also describes how we to achieve both
+datalocality and fairness with DRF in Omega thanks to delay scheduling
+a technique where frameworks wait for a timeout before they accept
+offers for nodes that don't contain the data they require. The
+last contribution is a description of how to emulate optimistic
+locking with a two level scheduler, an interesting technique that
+opens the door to setup mixed workloads in two level schedulers.
 
 However the implementations that this project has made of Mesos and
 Omega are really simple prototypes that make many simplifications when
 compared with the actual challenges faced by real world cluster
-schedulers and are of use only for experimentation and comprehension
-of the model. 
+schedulers and are of use only for experimentation and to facilitate
+the comprehension of the model. 
 
 Therefore further work in this project would include as a first step
 improving the stability of the implementations to be able to do test
 on them with some of the traces of real clusters that have been
-publicly released, this way been able to test in a near real
+publicly released, this way being able to test in a near real
 environment the modifications that have been proposed in the project.
 
 
-%% La fiche de synthèse doit contenir les éléments suivants :
+%% La fiche Dr synthèse doit contenir les éléments suivants :
 
 %% 1- Contexte général du stage
 %% Contexte et bref état de l'art : travaux dans ce domaine
