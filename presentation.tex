@@ -3,6 +3,7 @@
 \usetheme{Warsaw}
 \title{Improving dynamic allocation in cluster schedulers}
 \author{Inigo Mediavilla}
+\institute[Inst.]{\large{UPMC} \\\includegraphics[height=1cm,width=2cm]{viadeo.jpg}}
 \date\today
 %%\setbeamertemplate{note page}[plain]
 \setbeamertemplate{page}[plain]
@@ -24,6 +25,9 @@
     are called jobs in an execution environment with a limited amount
     of resources.
     \end{definition}
+    \begin{definition}{Framework:}
+    Application trying to run computations in the cluster.
+    \end{definition}
   \end{frame}
 
   \note{}
@@ -31,7 +35,7 @@
   \begin{frame}
     \frametitle{Scheduling}
     \begin{itemize}
-      \item Why is it relevant?
+      \item Why does it matter?
       \begin{itemize}
         \item Growing datacenters for big companies (Google, Yahoo!,
           Facebook, Amazon)
@@ -47,6 +51,7 @@
           \item Growing number of jobs to run
           \item Jobs are more sensitive to scheduling delays
           \item Diversity of scheduling needs
+          \item Need to ensure fairness
         \end{itemize}
      \end{itemize}
   \end{frame}
@@ -54,7 +59,44 @@
   \note{}
 
   \begin{frame}
-    \frametitle{Different Approaches}
+    \frametitle{Research Question}
+    \begin{itemize}
+      \item
+        How to provide a scheduler that scales well, is flexible to
+        support diverse strategies and is capable of ensuring a fair
+        repartition?
+    \end{itemize}
+  \end{frame}
+
+  \note{}
+
+
+  \begin{frame}
+    \frametitle{Summary}
+    \begin{itemize}
+      \item[A] Analysis of existing solutions
+      \item[B] Propositions
+        \begin{enumerate}
+          \item Adding fairness and datalocality to Omega
+          \item Simulating Optimistic locking with Mesos
+        \end{enumerate}
+      \item[C] Conclusions and further work
+    \end{itemize}
+  \end{frame}
+
+  \note{}
+
+  \begin{frame}
+    \frametitle{Analysis of existing solutions}
+    \begin{block}{Section A}
+    \begin{itemize}
+         \item Analysis of existing solutions
+    \end{itemize}
+     \end{block}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Analysis of existing solutions}
     \begin{enumerate}
       \item Centralized Scheduler (single-path or multi-path)
       \item Static partitioning
@@ -115,7 +157,7 @@
     \begin{definition}
       A central scheduler offers the available resources to
       the frameworks that can accept them and launch tasks
-      with them.
+      with them. (Hindman et al.)  
     \end{definition}
     \begin{itemize}
       \item Resources are dynamically allocated
@@ -154,7 +196,7 @@
       is updated only by the scheduler. The scheduler's role
       is just to mediate when conflict happens and share
       the state of the cluster with the frameworks when updates
-      happen.
+      happen.(Schwarzkopf et al.)
     \end{definition}
   \end{frame}
 
@@ -183,11 +225,21 @@
 
   \note{}
 
+
   \begin{frame}
-    \frametitle{Contributions}
+    \frametitle{Propositions}
+    \begin{block}{Section B}
+    \begin{itemize}
+         \item Propositions
+    \end{itemize}
+     \end{block}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Propositions}
+    Prototype implementations of Mesos and Omega
     \begin{enumerate}
-        \item Prototype implementations of Mesos and Omega
-        \item Fairness and Data-locality proposition for Omega
+        \item Adding fairness and datalocality to Omega
         \item Simulation optimistic locking with Mesos 
     \end{enumerate}
   \end{frame}
@@ -216,17 +268,52 @@
   }
 
   \begin{frame}
-    \frametitle{Fairness and datalocality proposition for Omega}
+    \frametitle{Adding fairness and datalocality to Omega}
+      \begin{center}
+      \includegraphics[trim = 50mm 80mm 50mm 17mm,clip,scale=0.34,natwidth=960,natheight=720]{DRF-Process(1).png}
+      \end{center}
+      \begin{itemize}
+        \item Dominant Resource A: CPU (1/9) Mem (4/18) $\Rightarrow$ Mem
+        \item Dominant Resource B: CPU (3/9) Mem (1/18) $\Rightarrow$ CPU
+      \end{itemize}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Adding fairness and datalocality to Omega}
+    Used DRF (Ghodsi et al.)
     \begin{itemize}
-      \item Fairness (quick explanation of DRF)
-      \item Limitations of DRF (and other fairness algorithms)
-      \item How to get both fairness and locality? Delay Scheduling
-      \item Delay scheduling implementation for Omega
+      \item The dominant resource (DR) represents the bottleneck
+      \item The idea is to give an equivalent \% of the DR
+      \item A task whose \% of DR is bigger gets less tasks
     \end{itemize}
   \end{frame}
 
   \note{}
 
+  \begin{frame}
+    \frametitle{Adding fairness and datalocality to Omega}
+      \includegraphics[trim = 50mm 0mm 0mm 10mm,clip,scale=0.45,natwidth=960,natheight=720]<1>{DRF-Process(1).png}
+      \includegraphics[trim = 50mm 0mm 0mm 10mm,clip,scale=0.45,natwidth=960,natheight=720]<2>{DRF-Process(2).png}
+      \includegraphics[trim = 50mm 0mm 0mm 10mm,clip,scale=0.45,natwidth=960,natheight=720]<3>{DRF-Process(3).png}
+      \includegraphics[trim = 50mm 0mm 0mm 10mm,clip,scale=0.45,natwidth=960,natheight=720]<4>{DRF-Process(4).png}
+      \includegraphics[trim = 50mm 0mm 0mm 10mm,clip,scale=0.45,natwidth=960,natheight=720]<5>{DRF-Process(5).png}
+      \includegraphics[trim = 50mm 0mm 0mm 10mm,clip,scale=0.45,natwidth=960,natheight=720]<6>{DRF-Process(6).png}
+  \end{frame}
+  \note{}
+
+  \begin{frame}
+    \frametitle{Adding fairness and datalocality to Omega}
+    \begin{itemize}
+      \item What is datalocality?
+      \item Fairness algorithms attemp against datalocality
+      \item How to have datalocality + fairness?
+      \begin{itemize}
+        \item Delay scheduling (et al.)
+      \end{itemize}
+    \end{itemize}
+  \end{frame}
+
+  \note{}
 
   \begin{frame}
     \frametitle{Simulating optimistic locking with Mesos}
@@ -235,7 +322,7 @@
         \begin{block}{Simulation}
             \begin{itemize}
               \item How does it work?
-              \item Advantages/ Disadvantages
+              \item Pros/Cons
               \item Mixed strategy
             \end{itemize}
          \end{block}
@@ -271,6 +358,16 @@
     approach, making Mesos adapt better to any kind of workload.
 
   }
+
+  \begin{frame}
+    \frametitle{Conclusions and further work}
+    \begin{block}{Section C}
+    \begin{itemize}
+         \item Conclusions and futher work 
+    \end{itemize}
+     \end{block}
+  \end{frame}
+
 
   \begin{frame}
     \frametitle{Conclusions}
@@ -316,7 +413,7 @@
   }
 
   \begin{frame}
-    \frametitle{Future work}
+    \frametitle{Further work}
     \begin{itemize}
       \item Add optimistic locking to Mesos
       \item Further test contributions 
