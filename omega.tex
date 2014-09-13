@@ -35,9 +35,9 @@ engineers at Google that provides a simple strategy based on a
 shared-state approach to allow frameworks to schedule their jobs
 independently and mediation to resolve conflicting demands. 
 
-Omega's approach results in an architecture where there is a simple 
-mediator that performs well even as the cluster grows and a set of
-modular framework schedulers that have the flexibility to schedule
+Omega's approach results in an architecture where the scheduler is a
+simple mediator that performs well even as the cluster grows and a set
+of modular framework schedulers that have the flexibility to schedule
 the way they want and use all the available resources of the cluster.
 
 \keywords{ Scheduling \and Resource management \and Cluster }
@@ -63,17 +63,17 @@ Clusters can run both batch jobs and long running jobs (services), two
 types of jobs that represent two completely different requirements.
 The former requires most of the resources in a cluster and can have
 complex placement requirements. The latter concentrates most of the scheduling
-effort with most jobs being batch jobs (> 80\%) according to the publicly
+effort with most jobs being batch jobs (\textgreater 80\%) according to the publicly
 released traces of the clusters of Yahoo \cite{parashar_10th_2010}, Google \cite{mishra_towards_2010} and Facebook \cite{Chen:EECS-2012-17}.
 
 The good use of a cluster can be measured by considering if the
 quality constraints required by services are satisfied, the execution
 time of batch jobs and the percentage of cluster utilization. The
 quality of the scheduling algorithm used for a cluster affects all
-these metrics for that reason having a good scheduling algorithm has a big
+these metrics, for that reason having a good scheduling algorithm has a big
 impact in the costs and the quality of the services provided.
 
-\subsection{Difficulties (Problematica) with cluster scheduling}
+\subsection{Difficulties with cluster scheduling}
 
 However the design of a cluster scheduler is not a straightforward
 task since it has many, sometimes contradictory, requirements.
@@ -94,15 +94,14 @@ need to be executed in the same cluster whose scheduler needs to be able to adap
 to the specific needs of every application while avoiding conflicts in
 the assignment of resources.
 
-Schedulers need to be prepared to execute both batch jobs and services
+Schedulers need to be prepared to execute both batch jobs and services,
 two kind of jobs that as we have seen have completely different
-requirements. Services need to be highly
-available and provide low latency demanding most of the resources of a
-cluster. Batch jobs are composed of thousands of small tasks so they
-can be affected by small delays in the scheduler. They operate over
-data stored in the cluster and should preferably be executed in the
-node where the data resides but their requirements are flexible and
-often allow preemption.
+requirements. Services need to be highly available and provide low
+latency, demanding most of the resources of a cluster. Batch jobs are
+composed of thousands of small tasks so they can be affected by small
+delays in the scheduler. They operate over data stored in the cluster
+and should preferably be executed in the node where the data resides
+but their requirements are flexible and often allow preemption.
 
 High availability is a requirement applicable to the schedulers
 themselves whose downtime affects the execution of any job to be
@@ -159,19 +158,20 @@ the solution implies an additional layer of complexity to an already
 difficult task.
 
 Besides this model requires modifying the code of the scheduler every
-time a new type of workload appears. 
+time a new type of workload appears.  \\
 
 Advantages:
 
-\begin{itemize}
+\begin{itemize}\itemsep4pt
   \item Control over the whole cluster. The scheduler is capable of taking good scheduling decisions.
   \item Good cluster utilization
-  \item Simplest solution when there's only one framework running in the cluster
+  \item Simplest solution when there's only one framework running in
+    the cluster \\
 \end{itemize}
 
 Disadvantages:
 
-\begin{itemize}
+\begin{itemize}\itemsep4pt
   \item Single point of failure
   \item Doesn't scale. The central scheduler is a bottleneck and
     slower jobs block other jobs that are faster to schedule.
@@ -194,20 +194,20 @@ for a while the model chosen by companies like Yahoo.
 Nonetheless this strategy's drawback is that since the different 
 categories run in different, isolated portions of the cluster the
 resources of the cluster are wasted since it is not possible for
-a partition to use the resources that another partition is not using.
+a partition to use the resources that another partition is not using. \\
 
 Advantages:
 
-\begin{itemize}
+\begin{itemize}\itemsep4pt
     \item Simple
     \item Every framework can use their specific scheduler that is specialized
     \item There's no possibility of conflicts between frameworks when
-      accessing the resources
+      accessing the resources \\
 \end{itemize}
 
 Disadvantages:
 
-\begin{itemize}
+\begin{itemize}\itemsep4pt
   \item Difficult to decide what is the right partition of the resources
 between frameworks
   \item Non-optimal utilization of the resources of the cluster, for example
@@ -270,7 +270,7 @@ A simple example where we have only one framework that wants to run a
 job formed by a single task will serve to explain all the steps that happen
 before a computation can take place in the cluster:
 
-\begin{enumerate}
+\begin{enumerate}\itemsep4pt
 \item Master starts. One of the candidates is selected as the master and 
 the others remain as backup masters that will take the place of the current leader in
 case it fails. The leader will start listening to the registration of slaves and 
@@ -307,7 +307,7 @@ are available again so the master can continue offering them to the frameworks.
 
 Advantages:
 
-\begin{itemize}
+\begin{itemize}\itemsep4pt
   \item
   Really simple central scheduler (master in Mesos terms) that has
   fail-over 
@@ -330,7 +330,7 @@ every framework gets its fair share of the cluster.
 
 Disadvantages:
 
-\begin{itemize}
+\begin{itemize}\itemsep4pt
  \item This kind of scheduling encourages frameworks to demand more
    resources than they actually need in preparation for everything
    they want to run. If a framework wants to run a list of tasks in
@@ -448,6 +448,46 @@ freed frequently. However it didn't work well in the simulation
 because the services that had long decision times locked their
 resources and batch jobs couldn't schedule their tasks.
 
+\section{A MapReduce scheduler}
+
+One of the benefits of the Omega scheduler is that it gives constantly
+to the frameworks the knowledge of what is the current state of the
+cluster. This is a knowledge that other models didn't provide or only
+provided partially in the cases of two level schedulers and that
+offers the possibility of implementing new scheduling techniques that
+were not possible before. One of this techniques allows to modify the
+behaviour of a framework based on the busyness of the framework. The
+engineers behind Omega defined an evolution of a MapReduce scheduler
+that uses this technique and that achieves a remarkable increase in
+the performance of its jobs. We will explain this evolution, how it
+compares with the standard MapReduce scheduler and the conditions of
+the tests that were used to evaluate its performance.
+
+Standard MapReduce schedulers have the numbers of workers set at
+submission time. To set this parameter engineers use estimations based
+on data obtained by the traces of the execution of similar jobs,
+approximations of the busyness of the cluster, trial and error and
+intuition. However the scheduler for an Omega framework knows the
+state of the cluster at all times, so it can benefit from this
+knowledge to vary the number of workers and increase it when many of
+the resources of the cluster are idle. This is what the authors of the
+Omega paper did with their MapReduce scheduler that observes the state
+of the cluster, predicts the benefits of adding more workers to
+current tasks and tasks to come and they allocate more resources
+according to some policy.
+
+In the experiment the policies tested where \emph{max-parallelism},
+\emph{global cap} and \emph{relative job size}. \emph{Max-parallelism}
+keeps adding resources to the job as long as there is benefit from
+it.\emph{Global cap} sets a maximum of busyness to the cluster and
+doesn't allow to allocate more resources when this limit is
+achieved. \emph{Relative job size} allows to add a maximum of four
+times the number of initially requested workers. The tests with the
+lightweight simulator proved that the relative performance of the
+frameworks could realistically be three or four times the performance
+of the standard scheduling policy with a fixed number of workers.
+
+
 \section{Summary}
 
 As we saw in the introduction, due to the diversity of processes that
@@ -471,6 +511,10 @@ even as the decision time of service jobs grows and the possibility of
 conflicts increases. Besides, it allows frameworks to dynamically
 increase or decrease the resource consumption, for example to speed up
 the execution of jobs when the cluster is under low usage.
+
+% Talk more about the experiment with the elastic scheduler
+% Talk about the limitations of the policies proposed for the elastic
+% scheduler and suggest deadline-based scheduling
 
 However even if Omega fits really well the context of Google cluster's
 it has its limitations. It doesn't work well when many jobs compete
