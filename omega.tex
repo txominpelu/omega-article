@@ -505,16 +505,31 @@ available resources for the whole cluster. It is well adapted for a
 variety of framework's scheduling needs since every framework takes
 care of doing his own scheduling and Omega only exposes the
 availability of resources and protects against allocation
-conflicts. It performs as well as the multi-path monolithic scheduler
-as it has been proven by the simulations carried out by its designers,
-even as the decision time of service jobs grows and the possibility of
-conflicts increases. Besides, it allows frameworks to dynamically
-increase or decrease the resource consumption, for example to speed up
-the execution of jobs when the cluster is under low usage.
+conflicts.
 
-% Talk more about the experiment with the elastic scheduler
-% Talk about the limitations of the policies proposed for the elastic
-% scheduler and suggest deadline-based scheduling
+The experiments carried out with both a lightweight simulator and the
+real traces of clusters show that Omega performs better than the
+multi-path monolithic scheduler, even as the decision time of service
+jobs grows and the possibility of conflicts increases two of the more
+important constraints required by the context of google's
+clusters. All of this with a design that is much simpler and much more
+modular than the old monolithic scheduler. This simplicity and
+modularity makes it way easier to extend the central scheduler and to
+define new framework schedulers that follow use new strategies and
+allows the scheduler to scale as the cluster and the number of jobs
+increases. 
+
+Besides, the design of Omega allows frameworks to dynamically increase
+or decrease the resource consumption, for example to speed up the
+execution of jobs when the cluster is under low usage. This has been
+proved with the implementation of an elastic MapReduce scheduler that
+modifies its scheduling technique to benefit from resources available
+in the cluster outperforming the standard MapReduce scheduler by a
+factor of in between three and four. 
+
+
+% Talk about limitation with scheduling working at too low level
+% not benefiting from low level architechture (firmament model)
 
 However even if Omega fits really well the context of Google cluster's
 it has its limitations. It doesn't work well when many jobs compete
