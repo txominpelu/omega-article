@@ -1,5 +1,5 @@
 
-\documentclass{svjour3}                     % onecolumn (standard format)
+\documentclass{article}                     % onecolumn (standard format)
 \usepackage[english, activeacute]{babel} %Definir idioma español
 \usepackage[utf8]{inputenc} %Codificacion utf-8
 \usepackage[autostyle]{csquotes}
@@ -14,9 +14,9 @@
 %\titlerunning{Short form of title}        % if too long for running head
 
 \author{ Inigo Mediavilla }
-\institute{ UPMC Master STL \at
-              \email{imediava@gmail.com}           %  \\
-}
+%\institute{ UPMC Master STL \at
+%              \email{imediava@gmail.com}           %  \\
+%}
 
 \date{\today}
 
@@ -33,14 +33,20 @@ while remaining capable of taking quick scheduling decisions.
 This article describes the scheduler called Omega developed by
 engineers at Google that provides a simple strategy based on a
 shared-state approach to allow frameworks to schedule their jobs
-independently and mediation to resolve conflicting demands. 
+independently and mediation to resolve conflicting demands.
 
-Omega's approach results in an architecture where the scheduler is a
-simple mediator that performs well even as the cluster grows and a set
-of modular framework schedulers that have the flexibility to schedule
-the way they want and use all the available resources of the cluster.
+The proposed model is described, compared to the existing solutions
+and some tips for an efficient implementation provided. In the end the
+article shows the results of tests that compare the performance of a
+lightweight simulator against the different models showing that Omega
+outperforms the other models in the conditions Google's cluster
+traces. It also proposes a MapReduce scheduler to run in Omega that
+benefits from the transparence of Omega and manages to dynamically
+adapt its allocation of workers to the conditions of the cluster
+increasing significantly the speed of the standard MapReduce scheduler.
 
-\keywords{ Scheduling \and Resource management \and Cluster }
+
+%\keywords{ Scheduling \and Resource management \and Cluster }
 % \PACS{PACS code1 \and PACS code2 \and more}
 % \subclass{MSC code1 \and MSC code2 \and more}
 \end{abstract}
@@ -75,14 +81,14 @@ impact in the costs and the quality of the services provided.
 
 \subsection{Difficulties with cluster scheduling}
 
-However the design of a cluster scheduler is not a straightforward
+The design of a cluster scheduler is not a straightforward
 task since it has many, sometimes contradictory, requirements.
 
 From now on we will call the applications that are executed in a
 cluster frameworks.  The number of frameworks for a given cluster can
 be high and the requirements for every one of them completely
 different. For example, service jobs needs are orthogonal to batch
-jobs needs and even map-reduce \cite{dean_mapreduce:_2008} jobs have
+jobs needs and even MapReduce \cite{dean_mapreduce:_2008} jobs have
 different constraints than MPI \cite{gabriel04:_open_mpi} jobs despite
 both being used to process and transform data.
 
@@ -111,14 +117,14 @@ job. Availability and low latency become harder requirements as the
 cluster grows, increasing the pressure on the scheduler that becomes
 more prone to failure and to delays.
 
-\subsection{Solutions for coordinated cluster scheduling}
+\section{Solutions for coordinated cluster scheduling}
 
 In the following section we will explain some of the existing models
 of cluster schedulers considering their advantages and disadvantages
 having into account the criteria introduced in the previous
-section. Finally we will introduce the model Omega \cite{41684}
-proposed by engineers at google that aims to overcome many of the
-limitations of the other approaches.
+section. Finally in section \ref{sec:omega} we will introduce the
+model Omega \cite{41684} proposed by engineers at google that aims to
+overcome many of the limitations of the other approaches.
 
 \subsubsection{Centralized scheduler}
 
@@ -137,17 +143,17 @@ cluster increases or as the jobs executed in the cluster
 diversify. When the number of jobs to execute increases, the central
 scheduler needs to be able to keep with the pace of jobs that are
 planned. On top of that a single scheduler represents a single point
-of failure. Parallelization can atenuate both problems but just at the
+of failure. Parallelization can attenuate both problems but just at the
 expense of adding complexity and introducing the need for synchronization
 between the schedulers.
 
 Above all, for a centralized scheduler it is difficult to adapt
-adequately to the heterogeinity of jobs that is executed in today's
+adequately to the heterogeneity of jobs that is executed in today's
 clusters \cite{37201}. Trying to define different
 scheduling paths for the different types of workloads is difficult
 because it requires algorithms to identify the type of a job, and comes
 at the expense of the scheduler's complexity. Some schedulers try to
-support different policies by implement really complex algorithms
+support different policies by implementing really complex algorithms
 involving different weighting factors that provide rough
 approximations of the objectives of every kind of workload. Others
 like google's run different scheduling logic for every kind of
@@ -164,19 +170,19 @@ Advantages:
 
 \begin{itemize}\itemsep4pt
   \item Control over the whole cluster. The scheduler is capable of taking good scheduling decisions.
-  \item Good cluster utilization
+  \item Good cluster utilization.
   \item Simplest solution when there's only one framework running in
-    the cluster \\
+    the cluster. \\
 \end{itemize}
 
 Disadvantages:
 
 \begin{itemize}\itemsep4pt
-  \item Single point of failure
+  \item Single point of failure.
   \item Doesn't scale. The central scheduler is a bottleneck and
     slower jobs block other jobs that are faster to schedule.
-  \item Can't adapt to new frameworks with new policies and needs
-  \item Complexity
+  \item Can't adapt to new frameworks with new policies and needs.
+  \item Complexity.
 \end{itemize}
 
 \subsection{Static partitioning}
@@ -199,20 +205,20 @@ a partition to use the resources that another partition is not using. \\
 Advantages:
 
 \begin{itemize}\itemsep4pt
-    \item Simple
-    \item Every framework can use their specific scheduler that is specialized
+    \item Simple.
+    \item Every framework can use their specific scheduler that is specialized.
     \item There's no possibility of conflicts between frameworks when
-      accessing the resources \\
+      accessing the resources. \\
 \end{itemize}
 
 Disadvantages:
 
 \begin{itemize}\itemsep4pt
   \item Difficult to decide what is the right partition of the resources
-between frameworks
-  \item Non-optimal utilization of the resources of the cluster, for example
-if one of the frameworks is idle other framework cannot use those
-available resources since the repartition is done statically
+between frameworks.
+  \item Non-optimal utilization of the resources of the cluster. If
+    one partition is idle the frameworks of other partitions cannot
+    use its available resources since the repartition is done statically.
 \end{itemize}
 
 \subsection{Two-Level scheduler}
@@ -252,8 +258,8 @@ custom policies can also be implemented. However if this policies are
 too simple the central scheduler of Mesos can be extended with new
 policies.
 
-Fail-over on the master is provided with machines that run as backups of the master and
-are capable to restore the master's state when it falls. Schedulers and slaves can find
+Failover on the master is provided with machines that run as backups of the master and
+are capable of restoring the master's state when it falls. Schedulers and slaves can find
 the new master to register to with centralized configuration services like Zookeeper \cite{_apache_????}.
 
 Partitioning of the resources of the cluster is provided thanks to Linux containers \cite{_linux_????}
@@ -284,7 +290,7 @@ of the cluster.
 \item Since our framework is alone in the cluster, the master makes an offer with
 all the resources available to our framework.
 \item The framework receives the offer and accepts it. It does so by responding to the
-offer with a list of the tasks that it wants to run specifying for every task: how to 
+offer with a list of the tasks that it wants to run specifying for every task how to 
 execute the task and what resources will be dedicated to the execution.
 The response will only be valid if the resources assigned to all the tasks are a subset
 of the resources offered by the master.
@@ -296,7 +302,7 @@ of the resources offered by the master.
   either making the binaries accessible to the whole cluster through a
   distributed filesystem like the Google File System
   \cite{ghemawat_google_2003} or Amazon's S3 \cite{_aws_????} or by
-  ensuring manually that the slaves have all the binaries in a public
+  ensuring manually that the slaves have all the binaries in a publicly
   accessible folder.
 \item Once the computation has finished the slave notifies the master that the resources
 are available again so the master can continue offering them to the frameworks.
@@ -310,10 +316,10 @@ Advantages:
 \begin{itemize}\itemsep4pt
   \item
   Really simple central scheduler (master in Mesos terms) that has
-  fail-over 
+  failover.
  \item
   Flexible: every framework decides how it schedules its tasks, the
-  master only offers resources following fairness 
+  master only offers resources following fairness.
  \item
   Through offer rejection, frameworks can achieve high data locality
   only accepting offers that correspond to nodes where the data is
@@ -322,7 +328,7 @@ Advantages:
   sacrificing job execution time benefiting from the fact that tasks in
   data processing frameworks like Hadoop or MPI are short so resources
   are freed frequently.
- \item Scalability
+ \item Scalability.
  \item Specialized for jobs with high chunk and where schedulers don't take
 too long. With this kind of job, resources are freed frequently and
 every framework gets its fair share of the cluster.
@@ -338,7 +344,7 @@ Disadvantages:
    many resources will be idle during most steps.
  \item Difficult to place picky jobs, for example to do gang scheduling
 frameworks in Mesos need to do resource hoarding what can lead to
-deadlocks
+deadlocks.
  \item When a framework is offered some resources it
 holds the lock for the resource for the time the offer is
 available. If a framework hoards the resources or takes a long
@@ -354,7 +360,8 @@ of two-level schedulers suffers.
   take actions only when the resources are offered. 
 \end{itemize}
 
-\subsection{Optimistic locking}
+\section{Omega}
+\label{sec:omega}
 
 Another approach to cluster scheduling that tries to overcome some of
 the limitations of the pessimistic locking of two-level schedulers is
@@ -370,9 +377,10 @@ since the last update, the framework receives the updated version of
 the cluster and it can retry a commit of available resources. With
 this approach every scheduler has an overall view of the cluster what
 allows them to make better scheduling decisions while having a
-mediation mechanism when two frameworks want to commit for the same resources.
+mediation mechanism when two frameworks want to commit for the same
+resources.
 
-\subsubsection{Optimizations}
+\subsection{Optimizations}
 
 The performance of this solution depends completely on how often
 conflicts happen and how this conflicts are resolved. An initial
@@ -395,9 +403,16 @@ fine-grained resource allocation, where allocation could be done only
 in a subset of the machine's resources was introduced. Another
 optimization added the possibility to do incremental scheduling of
 tasks as well, having to retry only the unscheduled tasks after a
-conflict. These two optimizations gave Omega the performance expected.
+conflict.
 
-\subsubsection{Simulation}
+After this two optimizations were implemented a bigger range
+of tests were run that allowed to compare the behaviour of Omega, with
+this more performant setup, and the rest of the existing scheduling
+models. The section \ref{sec:simulation} shows the results of this
+experiments and the place that Omega takes in relation to its pairs.
+
+\subsection{Simulation}
+\label{sec:simulation}
 
 The more challenging problem that Omega wanted to solve was how
 to build an scheduler that could keep the pace when scheduling batch
@@ -448,7 +463,21 @@ freed frequently. However it didn't work well in the simulation
 because the services that had long decision times locked their
 resources and batch jobs couldn't schedule their tasks.
 
-\section{A MapReduce scheduler}
+The Omega simulator performed as well as the multi-path monolithic
+scheduler in the normal situation described by the traces but it it
+doesn't suffer from head of line blocking because service jobs and
+batch jobs do not share an scheduling path. Tests where also performed
+to see the behaviour of Omega as the cluster and the interarrival rate
+of jobs increases. Omega outperform all the other models in this test,
+being capable of dealing with in between 2.5 and 9.5 times the
+original workflow before starting failing. Other test showed that
+multiple loadbalanced Omega schedulers could deal with even larger
+loads, having an increased conflict rate that is compensated by a
+lower per scheduler busyness. In summary the tests proved that Omega
+works as well as the best model in the standard situation and is
+better fitted for an increase in the load of the cluster.
+
+\subsection{A MapReduce scheduler}
 
 One of the benefits of the Omega scheduler is that it gives constantly
 to the frameworks the knowledge of what is the current state of the
@@ -456,7 +485,7 @@ cluster. This is a knowledge that other models didn't provide or only
 provided partially in the cases of two level schedulers and that
 offers the possibility of implementing new scheduling techniques that
 were not possible before. One of this techniques allows to modify the
-behaviour of a framework based on the busyness of the framework. The
+behavior of a framework based on the busyness of the framework. The
 engineers behind Omega defined an evolution of a MapReduce scheduler
 that uses this technique and that achieves a remarkable increase in
 the performance of its jobs. We will explain this evolution, how it
@@ -488,7 +517,7 @@ frameworks could realistically be three or four times the performance
 of the standard scheduling policy with a fixed number of workers.
 
 
-\section{Summary}
+\section{Conclusions and further work}
 
 As we saw in the introduction, due to the diversity of processes that
 are executed in a cluster, the need to share data between applications
@@ -523,15 +552,15 @@ Besides, the design of Omega allows frameworks to dynamically increase
 or decrease the resource consumption, for example to speed up the
 execution of jobs when the cluster is under low usage. This has been
 proved with the implementation of an elastic MapReduce scheduler that
-modifies its scheduling technique to benefit from resources available
+modifies its scheduling strategy to benefit from resources available
 in the cluster outperforming the standard MapReduce scheduler by a
 factor of in between three and four. 
 
 
 % Talk about limitation with scheduling working at too low level
-% not benefiting from low level architechture (firmament model)
+% not benefiting from low level architecture (firmament model)
 
-However even if Omega fits really well the context of Google cluster's
+However even if Omega fits really well the context of Google clusters
 it has its limitations. It doesn't work well when many jobs compete
 frequently for access to the same resource (e.g many batch jobs want to run
 on the same cluster node) or when cluster utilization is really high,
@@ -543,6 +572,33 @@ frameworks. For the moment Omega only provides global policies through
 a simple mechanism for dealing with priorities and through post-facto
 monitoring but this is one of the biggest axes of improvement for the
 shared-state approach.
+
+Another limitation that applies not only to Omega but to all the other
+scheduling models explained in the article comes from the fact that
+these models don't take into consideration low level details of the
+machines that conform the cluster nor they provide support for 
+adapting the scheduling decisions to this low level details. This is
+partially because todays clusters are mainly form by sets of heterogeneous
+machines, therefore it is more difficult to consider all the different
+configurations of all the machines when scheduling.
+
+The problem is that by not considering the low level details of
+machines when scheduling has important considerations in the
+performance of the tasks. We can take as an example the cost of
+accesing memory for the applications running in a cluster.  Some
+applications are more sensitive to the time spent accessing memory
+because they are intrinsically more memory intensive. This is the kind
+of application that benefits greatly from the different levels of
+cache. However, having two applications of this type running at the
+same time in the same machine degrades the performance significantly
+because they both occupy the cache in turns and by doing that the
+increase the number of misses. Today's models including Omega, don't
+make this kind of optimization. It would be interesting to try to study 
+how some of this changes affect the performance of the cluster. Some
+work in this sense has already been done in \cite{_firmament_????} and luckily that
+model could be applied to other kind of problems of inference
+between applications not only due to memory inference but also due to
+network, I/O or CPU interference.
 
 \section{Bibliography}
 
